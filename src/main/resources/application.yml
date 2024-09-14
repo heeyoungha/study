@@ -27,7 +27,7 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://localhost:3306/study-version
+    url: jdbc:mysql://study-version.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/study-version
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -35,6 +35,8 @@ spring:
     hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect # 스프링부트 3.x는 이렇게 설정해야 + 명시적 Dialect 설정
         ddl-auto: create #create???? ?? ?? ???? ?? ????? create?? ??? ???? ???? ? ????
+
+
     properties:
       hibernate:
         #show_sql: true
@@ -51,19 +53,16 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:mysql://localhost:3306/study-version
+    url: jdbc:mysql://study-version.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/study-version
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # 스프링부트 3.x는 이렇게 설정해야 + 명시적 Dialect 설정
     ddl-auto: create #create???? ?? ?? ???? ?? ????? create?? ??? ???? ???? ? ????
     show-sql: true
 
 cafe:
   recommendation:
     base:
-      url: http://35.209.134.113/dir # 고정 ip 할당 받은 후 변경 예정
+      url: http://10.0.1.86/dir # 고정 ip 할당 받은 후 변경 예정
 
