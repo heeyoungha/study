@@ -1,18 +1,4 @@
 services:                                               # 이 항목 밑에 실행하려는 컨테이너들을 정의
-  study-database:
-    container_name: study-database
-    build:
-      dockerfile: Dockerfile
-      context: ./database
-    image: heeyoungha/study-database
-    environment:
-      - MYSQL_DATABASE=study-version
-      - MYSQL_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-    volumes:
-      - ./database/config:/etc/mysql/conf.d
-    ports:
-      - "3306:3306"      # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
-
   study-app: # 애플리케이션 서버를 설정하는 역할을 하는 서비스
     build:
       context: . # Docker 이미지 빌드에 사용할 파일들이 있는 디렉터리 경로입니다. 여기서는 현재 경로의 app 디렉터리를 사용
@@ -20,12 +6,10 @@ services:                                               # 이 항목 밑에 실�
     container_name: study-app
     ports:
       - "8080:8080"
-    depends_on:
-      - study-database
     image: heeyoungha/study-app
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://study-database:3306/study-version  # 애플리케이션에서 사용할 데이터베이스의 URL # study-database라는 이름의 컨테이너에서 3306 포트로 접근할 수 있는 MySQL 데이터베이스를 가리킴
-      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_URL=jdbc:mysql://study-version.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/study-version  # 애플리케이션에서 사용할 데이터베이스의 URL # study-database라는 이름의 컨테이너에서 3306 포트로 접근할 수 있는 MySQL 데이터베이스를 가리킴
+      - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
