@@ -37,16 +37,22 @@ jobs:
       - name: Push to DockerHub
         run: docker push heeyoungha/study-app
 
-      - name: Deploy to EC2
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+
+      - name: SSH and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER}@${HOST} '
+            docker-compose pull
+            docker-compose up -d --build
+          '
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
           USER: ${{ secrets.EC2_USER }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER}@${HOST} '
-            docker-compose pull
-            docker-compose up -d --build
+
           '
 
 
