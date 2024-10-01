@@ -38,6 +38,7 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.2.0'
 
     // https://github.com/seruco/base62
     implementation 'io.seruco.encoding:base62:0.1.3'

@@ -1,11 +1,13 @@
 # default
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}  # default
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # default
     group:
       local:  # local, common profile? ???? ?? ?????? ??
         - common
       prod:   # prod, common profile? ???? ?? ?????? ??
+        - common
+      dev:
         - common
 
 ---
@@ -27,26 +29,41 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://study-version.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/study-version
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://study-database:3306/study-version
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # 스프링부트 3.x는 이렇게 설정해야 + 명시적 Dialect 설정
-        ddl-auto: create #create???? ?? ?? ???? ?? ????? create?? ??? ???? ???? ? ????
-
-
-    properties:
+    redis:
+      host: cafe-redis
+      port: 6379
+    jpa:
       hibernate:
-        #show_sql: true
-        format_sql: true
-
-
+        ddl-auto: validate # prod 배포시 validate
+      show-sql: true
 cafe:
   recommendation:
     base:
       url: http://localhost:8080/dir/
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/study-version?allowPublicKeyRetrieval=true&useSSL=false
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MariaDBDialect
+cafe:
+  recommendation:
+    base:
+      url: http://localhost:8080/dir/ # 고정 ip 할당 받은 후 변경 예정
 ---
 spring:
   config:
@@ -64,5 +81,5 @@ spring:
 cafe:
   recommendation:
     base:
-      url: http://10.0.1.86/dir # 고정 ip 할당 받은 후 변경 예정
+      url: http://3.36.241.20/dir # 고정 ip 할당 받은 후 변경 예정
 

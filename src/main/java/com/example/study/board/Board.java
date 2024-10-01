@@ -26,6 +26,9 @@ public class Board extends BaseEntity {
     @Column(length = 10, nullable = false)
     private String writer;
 
+    @Column(length = 10, nullable = false)
+    private String tag;
+
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Reply> replyList;
 
