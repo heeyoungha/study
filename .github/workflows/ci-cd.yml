@@ -37,19 +37,17 @@ jobs:
       - name: Push to DockerHub
         run: docker push heeyoungha/study-app
 
-      - name: 비밀키 형식 확인
-        run: |
-          file private_key
-          cat private_key | head -n 5
-
       - name: Set up SSH key
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY }}" | tr -d '\r' > private_key
           chmod 600 private_key
-
+      - name: 비밀키 형식 확인
+        run: |
+          file private_key
+          cat private_key | head -n 5
       - name: SSH and deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+          ssh -v -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             docker-compose pull
             cd study
             docker-compose up -d --build
