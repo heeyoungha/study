@@ -44,8 +44,15 @@ jobs:
 
       - name: 비밀키 형식 확인
         run: |
-          file private_key
-          cat private_key | head -n 5
+          start_line=$(head -n 1 private_key)
+          end_line=$(tail -n 1 private_key)
+          
+          if [[ "$start_line" == "-----BEGIN RSA PRIVATE KEY-----" && "$end_line" == "-----END RSA PRIVATE KEY-----" ]]; then
+            echo "The private key is in the correct RSA format."
+          else
+            echo "The private key is not in the correct RSA format."
+            exit 1
+          fi
 
       - name: Verify private key file
         run: ls -l private_key
