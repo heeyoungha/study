@@ -41,10 +41,12 @@ jobs:
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY }}" | tr -d '\r' > private_key
           chmod 600 private_key
+
       - name: 비밀키 형식 확인
         run: |
           file private_key
           cat private_key | head -n 5
+
       - name: Verify private key file
         run: ls -l private_key
 
@@ -56,7 +58,6 @@ jobs:
         run: |
           ssh -v -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             docker-compose pull
-            cd study
             docker-compose up -d --build
           '
       
