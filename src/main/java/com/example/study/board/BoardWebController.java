@@ -20,7 +20,7 @@ public class BoardWebController {
     public String list(Model model,
                        @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC)
             Pageable pageable,
-                       @RequestParam String searchTitle
+                       @RequestParam(required = false) String searchTitle
     ) {
         Page<BoardDto> boardDtoPage = boardService.boardSearchList(searchTitle, pageable);
 
