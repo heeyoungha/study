@@ -1,6 +1,7 @@
 package com.example.study.board;
 
 import com.example.study.board.reply.Reply;
+import com.example.study.common.exception.DomainException;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -100,5 +101,14 @@ public class BoardService {
     }
 
 
+    public List<Reply> getReplyList(Long boardId){
+
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(()-> DomainException.notFindRow(boardId));
+
+        List<Reply> replyList = board.getReplyList();
+
+        return replyList;
+    }
 }
 

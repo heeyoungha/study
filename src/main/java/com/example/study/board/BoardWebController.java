@@ -1,5 +1,6 @@
 package com.example.study.board;
 
+import com.example.study.board.reply.Reply;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,10 +49,14 @@ public class BoardWebController {
         return boardService.saveBoard(dto);
     }
 
-    @GetMapping("/{boardId}")
-    public ResponseEntity<BoardDto> readBoard(@PathVariable("boardId") Long id){
+    @GetMapping("/board/{boardId}")
+    public String readBoard(@PathVariable("boardId") Long id, Model model){
         BoardDto boardDto = boardService.getBoard(id);
-        return ResponseEntity.ok(boardDto);
+        List<Reply> replyList = boardService.getReplyList(id);
+        model.addAttribute("boardDto", boardDto);
+        model.addAttribute("replyList", replyList);
+
+        return "board/board-detail";
     }
 
     @PutMapping("/{boardId}")

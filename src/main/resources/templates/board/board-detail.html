@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>board-datail</title>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction : column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 70%;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+            width: 70%;
+            margin: 0 auto;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        span{
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group form {
+            margin-right: 10px;
+            display: flex;
+        }
+
+
+        .input-group-append .btn {
+            margin-left: 5px;
+        }
+
+        table {
+            width: 50%;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .replySpan_editReply{
+            display: flex;
+            justify-content: right;
+        }
+
+        .lead {
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .lead a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<h2 th:text="${boardDto.title}"></h2>
+<p th:text="${boardDto.content}"></p>
+
+<!-- 수정 or 삭제 -->
+<div class="button-group">
+    <a th:href="@{'/v1/board/edit/' + ${boardDto.id}}">
+        <button>수정</button>
+    </a>
+    <button th:onclick="'deleteBoard(' + ${boardDto.id} + ')'">삭제</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>작성자</th>
+        <th>내용</th>
+    </tr>
+    </thead>
+    <tbody>
+    <th:block th:if="${replyList != null}">
+        <tr th:each="reply : ${replyList}">
+            <td th:text="${reply.id}"></td>
+            <td>
+                <div th:if="${reply != null}" th:text="${reply.member}"></div>
+                <div th:unless="${reply != null}">No Reply</div>
+            </td>
+            <td class="replySpan_editReply">
+                <span id="${reply.id}" th:text="${reply.content}"></span>
+                <div class="button-group">
+                    <form>
+                        <button href="#" id="btnReply" class="edit-reply-button" replyid="${reply.id}" onclick="editReply(event)">수정</button>
+                    </form>
+                    <a href="#" th:href="@{/board/{boardId}/reply/{replyId}(boardId=${boardDto.id}, replyId=${reply.id})}" onClick="javascript:deleteReply(event)" th:replyid="@{${reply.id}}">
+                        <button>삭제</button>
+                    </a>
+                    <!-- Reply Edit Form -->
+                    <form id="editReplyForm" style="display: none;">
+                        <input type="text" id="editContent" name="content" class="form-control" placeholder="댓글을 수정해주세요.." aria-label="댓글을 수정해주세요.." aria-describedby="basic-addon2" />
+                        <input type="hidden" id="replyEdit-boardId" name="replyEdit-boardId" th:value="${boardDto.id}" />
+                        <input type="hidden" id="replyId" name="replyId" th:value="${reply.id}" />
+
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" onclick="submitEdit(event)">수정 완료</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="cancelEdit(event)">수정 취소</button>
+                        </div>
+                    </form>
+                </div>
+
+            </td>
+        </tr>
+    </th:block>
+    <th:block th:unless="${replyList != null}">
+        <tr>
+            <td colspan="4">댓글이 없습니다.</td>
+        </tr>
+    </th:block>
+    </tbody>
+</table>
+
+<!-- Reply Section -->
+<div class="input-group">
+    <form id="reply" th:action="@{/board/{boardId}/reply (boardId=${boardDto.id})}" method="post">
+        <input type="text" id="content" name="content" class="form-control" placeholder="댓글을 입력해주세요.." aria-label="댓글을 입력해주세요.." aria-describedby="basic-addon2" />
+        <input type="hidden" id="boardId" name="boardId" th:value="${boardDto.id}" />
+        <button class="btn btn-outline-secondary" type="submit">등록</button>
+    </form>
+</div>
+
+<script>
+    //게시글 삭제
+    function deleteBoard(id) {
+        if(confirm('정말로 삭제하시겠습니까?')) {
+            fetch(`/v1/board/${id}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if(response.ok) {
+                        alert('삭제되었습니다.');
+                        window.location.href = '/v1/boardList'; // 홈페이지로 리다이렉트
+                    } else {
+                        alert('삭제에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('오류가 발생했습니다.');
+                });
+        }
+    }
+
+    function editReply(event) {
+        event.preventDefault();
+        var replyId = event.target.getAttribute('replyid');
+        var contentElement = document.getElementById(replyId);
+        var editForm = document.getElementById('editReplyForm');
+        var editContent = document.getElementById('editContent');
+        var replyBtn= document.getElementById('btnReply');
+        var replyBtn2= document.getElementById('btnReply2');
+
+        // 현재 댓글 내용을 수정 폼에 설정
+        editContent.value = contentElement.innerText;
+
+        // 수정 폼 보이기
+        editForm.style.display = 'block';
+
+        // 댓글 내용 숨기기
+        //contentElement.style.display = 'none';
+
+        //수정,삭제 버튼 숨기기
+        replyBtn.style.display = 'none';
+        replyBtn2.style.display = 'none';
+    }
+
+    function submitEdit(event) {
+        event.preventDefault();
+        var replyId = document.getElementById('replyId').value;
+        var editContent = document.getElementById('editContent').value;
+        var contentElement = document.getElementById('replyId');
+        var editForm = document.getElementById('editReplyForm');
+
+        // 수정된 댓글 내용을 댓글에 설정
+        //console.log(replyId);
+        //console.log(contentElement);
+        contentElement.innerText = editContent;
+
+        // 수정 폼 숨기기
+        editForm.style.display = 'none';
+
+        // 댓글 내용 보이기
+        contentElement.style.display = 'inline';
+
+        // 수정된 내용을 서버로 전송하는 코드 추가
+        var boardId = document.getElementById('boardId').value;
+        var data = {
+            boardId: boardId,
+            replyId: replyId,
+            content: editContent
+        };
+
+        $.ajax({
+            type: 'PUT',
+            url: '/board/'+boardId+'/reply/'+replyId,
+            data: data,
+            success: function(response) {
+                // 서버로부터의 응답을 처리
+                console.log(response);
+                // 댓글 수정 후 화면 새로고침
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                // 오류 발생 시 처리
+                console.log(error);
+            }
+        });
+    }
+
+    function cancelEdit(event) {
+        event.preventDefault();
+        var contentElement = document.getElementById('replyId');
+        var editForm = document.getElementById('editReplyForm');
+
+        // 수정 폼 숨기기
+        editForm.style.display = 'none';
+        //test
+
+        // 댓글 내용 보이기
+        contentElement.style.display = 'inline';
+    }
+
+
+        // 댓글 삭제
+        function deleteReply(e) {
+            e.preventDefault();
+            let replyid = e.target.dataset.replyid;
+            let action = e.target.getAttribute("href");
+            let boardid = [[${boardDto.id}]];
+            if (confirm("정말로 삭제하시겠습니까?")) {
+
+                // DELETE 요청 보내는 코드 작성
+                // 예를 들어, axios 또는 fetch API를 사용하여 DELETE 요청을 보낼 수 있습니다.
+                $.ajax({
+                    url: action,
+                    method: 'delete',
+                    data: {replyid: Number(replyid)},
+                    dataType: 'html',
+                    success: function (res) {
+                        location.href = "/board/" + boardid;
+                        console.log('삭제 성공')
+                        console.log(res);
+                    },
+                    error: function (xhr, status, error) {
+                        // This code will run if the request encounters an error
+                        console.log('Error occurred during the delete request');
+                        console.log('Status: ' + status);
+                        console.log('Error message: ' + error);
+                    }
+                })
+            }
+
+        }
+</script>
+<!-- Reply Section End -->
+<p class="lead">
+    <a href="/boardList" role="button">목록으로</a>
+</p>
+
+</body>
+</html>
