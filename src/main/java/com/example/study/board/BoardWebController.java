@@ -38,10 +38,14 @@ public class BoardWebController {
         return "board/getBoardList";
     }
 
-    @PostMapping
-    public ResponseEntity<BoardDto> createBoard(@RequestBody BoardDto dto){
-        BoardDto boardDto = boardService.saveBoard(dto);
-        return ResponseEntity.ok(boardDto);
+    @GetMapping("/board")
+    public String getCreateBoard(){
+        return "board/create-board.html";
+    }
+
+    @PostMapping("/board")
+    public BoardDto createBoard(@RequestBody BoardDto dto){
+        return boardService.saveBoard(dto);
     }
 
     @GetMapping("/{boardId}")
