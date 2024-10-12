@@ -59,10 +59,18 @@ public class BoardWebController {
         return "board/board-detail";
     }
 
-    @PutMapping("/{boardId}")
-    public ResponseEntity<BoardDto> updateBoard(@PathVariable("boardId") Long id, @RequestBody BoardDto dto){
-        BoardDto boardDto = boardService.updateBoard(id, dto);
-        return ResponseEntity.ok(boardDto);
+    @GetMapping("/board/edit/{boardId}")
+    public String editBoard(@PathVariable("boardId") Long id, Model model){
+        BoardDto boardDto = boardService.getBoard(id);
+        model.addAttribute("boardDto", boardDto);
+        return "board/edit";
+    }
+
+    @PutMapping("/board/edit/{boardId}")
+    @ResponseBody
+    public ResponseEntity<?> updateBoard(@PathVariable("boardId") Long id, @RequestBody BoardDto dto){
+        boardService.updateBoard(id, dto);
+        return ResponseEntity.ok().build();
     }
 
 

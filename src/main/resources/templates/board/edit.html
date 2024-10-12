@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<form id="boardForm" th:object="${boardDto}">
+    <input type="hidden" name="id" th:value="*{id}"/>
+    <label for="title">제목:</label>
+    <input type="text" name="title" id="title" th:value="*{title}"/><br>
+    <label for="writer">작성자:</label>
+    <input type="text" name="writer" id="writer" th:value="*{writer}"/><br>
+    <label for="content">내용:</label>
+    <textarea name="content" id="content" th:text="*{content}"></textarea>
+    <button type="button" onclick="submitForm()">저장</button>
+</form>
+<script>
+    function submitForm() {
+        const form = document.getElementById('boardForm');
+        const formData = new FormData(form);
+
+        const boardDto = {
+            id: formData.get('id'),
+            title: formData.get('title'),
+            writer: formData.get('writer'),
+            content: formData.get('content')
+        };
+
+        fetch(`/v1/board/edit/${boardDto.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(boardDto)
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/v1/boardList'; // 성공 시 리다이렉트
+                } else {
+                    alert('업데이트 실패');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+</html>
