@@ -73,5 +73,11 @@ public class BoardWebController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/board/{id}")
+    @ResponseBody
+    public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
+        boardService.deleteBoard(id);
+        return ResponseEntity.ok().build();
+    }
 
 }
