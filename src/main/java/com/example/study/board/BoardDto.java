@@ -21,6 +21,7 @@ public class BoardDto {
     public BoardDto(Board board){
         this.id = board.getId();
         this.writer = board.getWriter();
+        this.title = board.getTitle();
         this.content = board.getContent();
         this.createdDate = board.getCreatedDate();
     }

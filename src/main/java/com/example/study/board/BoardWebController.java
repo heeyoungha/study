@@ -10,13 +10,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
-@RequestMapping("v1/board")
+@RequestMapping("v1")
 @RequiredArgsConstructor
 public class BoardWebController {
     private final BoardService boardService;
 
-    @GetMapping
+    @GetMapping(value = {"/boardList", "/"})
     public String list(Model model,
                        @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC)
             Pageable pageable,
