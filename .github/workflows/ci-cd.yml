@@ -26,7 +26,7 @@ jobs:
         run: ./gradlew build
 
       - name: Build Docker image
-        run: docker build -t heeyoungha/study-app .
+        run: docker build -t heeyoungha/study-app:latest .
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push to DockerHub
-        run: docker push heeyoungha/study-app
+        run: docker push heeyoungha/study-app:latest
 
       - name: Set up SSH key
         run: |
