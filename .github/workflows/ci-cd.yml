@@ -35,7 +35,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push to DockerHub
-        run: docker push heeyoungha/study-app:latest
+        run: |
+          docker push heeyoungha/study-app:latest
+          docker tag heeyoungha/study-app:latest heeyoungha/study-app:${{ github.sha }}
+          docker push heeyoungha/study-app:${{ github.sha }}
 
       - name: Set up SSH key
         run: |
