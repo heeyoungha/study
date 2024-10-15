@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("v1")
+@RequestMapping("/v1")
 @RequiredArgsConstructor
 public class BoardWebController {
     private final BoardService boardService;
