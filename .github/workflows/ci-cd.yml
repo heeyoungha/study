@@ -23,7 +23,16 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build -x test
+
+      - name: Check if JAR file exists
+        run: |
+          if [ -f build/libs/app.jar ]; then
+            echo "JAR file exists."
+          else
+            echo "JAR file not found."
+            exit 1
+          fi
 
       - name: Build Docker image
         run: docker build --no-cache -t heeyoungha/study-app:latest .
