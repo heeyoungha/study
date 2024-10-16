@@ -36,7 +36,7 @@ public class BoardWebController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
-        return "board/getBoardList";
+        return "board/get-boardlist";
     }
 
     @GetMapping("/board")
