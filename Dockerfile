@@ -1,5 +1,4 @@
 FROM openjdk:17-jdk-slim
-ARG JAR_FILE=build/libs/app.jar
-COPY ${JAR_FILE} ./app.jar
+COPY build/libs/app.jar app.jar
 ENV TZ=Asia/Seoul
 ENTRYPOINT ["java", "-jar", "./app.jar"]

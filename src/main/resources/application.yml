@@ -1,7 +1,7 @@
 # default
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}  # default
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # default
     group:
       local:  # local, common profile? ???? ?? ?????? ??
         - common
@@ -54,6 +54,9 @@ spring:
     url: jdbc:mariadb://localhost:3306/study-version?allowPublicKeyRetrieval=true&useSSL=false
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
   jpa:
     hibernate:
       ddl-auto: create
@@ -84,6 +87,7 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.zaxxer.hikari: DEBUG
     org.springframework.jdbc: DEBUG
+    org.springframework.web: DEBUG
 
 cafe:
   recommendation:

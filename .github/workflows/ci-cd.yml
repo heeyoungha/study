@@ -35,8 +35,9 @@ jobs:
           fi
 
       - name: Build Docker image
-        run: docker build --no-cache -t heeyoungha/study-app:latest .
-
+        run: |
+          docker build --no-cache -t heeyoungha/study-app:latest .
+          docker build --no-cache -t heeyoungha/study-app:${{ github.sha }} .
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -78,6 +79,7 @@ jobs:
           ssh -vvv -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             cd study
             docker-compose pull
+            docker-compose down
             docker-compose up -d --build
           '
       
