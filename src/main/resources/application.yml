@@ -84,11 +84,14 @@ spring:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+    org.hibernate.tool.hbm2ddl : DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.zaxxer.hikari: DEBUG
     org.springframework.jdbc: DEBUG
     org.springframework.web: DEBUG
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+
+
 
 cafe:
   recommendation:
