@@ -88,6 +88,7 @@ logging:
     com.zaxxer.hikari: DEBUG
     org.springframework.jdbc: DEBUG
     org.springframework.web: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
 
 cafe:
   recommendation:
