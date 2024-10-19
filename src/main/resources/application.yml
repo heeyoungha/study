@@ -94,6 +94,7 @@ logging:
     root: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.tool.hbm2ddl : TRACE
+    org.hibernate.tool.schema: TRACE
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.hibernate.type.descriptor.sql: TRACE
     com.zaxxer.hikari: DEBUG
