@@ -8,7 +8,7 @@ services:                                               # 이 항목 밑에 실�
       - "8080:8080"
     image: heeyoungha/study-app:latest
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://study-version.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/study-version  # 애플리케이션에서 사용할 데이터베이스의 URL # study-database라는 이름의 컨테이너에서 3306 포트로 접근할 수 있는 MySQL 데이터베이스를 가리킴
+      - SPRING_DATASOURCE_URL=jdbc:mysql://sopt.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/sopt  # 애플리케이션에서 사용할 데이터베이스의 URL # study-database라는 이름의 컨테이너에서 3306 포트로 접근할 수 있는 MySQL 데이터베이스를 가리킴
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
