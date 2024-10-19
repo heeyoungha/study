@@ -53,18 +53,19 @@ public class BoardWebController {
 
     @GetMapping("/board")
     public String getCreateBoard(){
+
+        logger.debug("getCreateBoard()");
         return "board/create-board.html";
     }
 
     @PostMapping("/board")
     public BoardDto createBoard(@RequestBody BoardDto dto){
 
-        // 로깅 추가
-        logger.info("Received request to create board with title: {}, content: {}", dto.getTitle(), dto.getContent());
+        logger.debug("Received request to create board with title: {}, content: {}", dto.getTitle(), dto.getContent());
 
         BoardDto savedBoard = boardService.saveBoard(dto);
-        // 로깅 추가: 저장된 결과 확인
-        logger.info("Board created with ID: {}", savedBoard.getId());
+
+        logger.debug("Board created with ID: {}", savedBoard.getId());
 
         return savedBoard;
     }
