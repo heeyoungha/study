@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MindMap {
 
     @GetMapping("/mindmap")
-    public String index(){
+    public String index() {
         //project 엔티티
         //study 엔티티
-        return "index";
+        return "mindmap";
     }
 }
