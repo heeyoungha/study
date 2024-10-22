@@ -1,6 +1,6 @@
 package com.example.study.user;
 
-인import com.example.study.common.BaseEntity;
+import com.example.study.common.BaseEntity;
 import com.example.study.projectUser.ProjectUser;
 import com.example.study.user.dto.UserRequest;
 import jakarta.persistence.*;
@@ -23,7 +23,10 @@ public class User extends BaseEntity {
     private Long id;
     private String username;
     private String email;
+    private String role;
     private String pw;
+    @Column(name = "status")
+    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_user_id")
@@ -33,5 +36,9 @@ public class User extends BaseEntity {
         this.pw = request.getPw();
         this.email = request.getEmail();
         this.username = request.getUsername();
+    }
+    public void updatOauthUser(String name, String email){
+        this.username = name;
+        this.email = email;
     }
 }
