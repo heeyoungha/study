@@ -25,6 +25,13 @@ body {
     text-align: center; /* 텍스트 가운데 정렬 */
 }
 
+h1 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: #007bff; /* 통일된 색상 */
+}
+
 h2 {
     font-size: 24px;
     margin-bottom: 30px;
@@ -41,6 +48,16 @@ p {
     border-top: 1px solid #ccc;
     padding-top: 20px;
 }
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 10px;
+}
+a:hover {
+    color: #0056b3;
+}
+
 
 label {
     font-size: 16px;
@@ -76,14 +93,6 @@ input.form-control {
     margin-top: 20px;
 }
 
-/* 반응형 디자인을 위한 미디어 쿼리 */
-@media (max-width: 768px) {
-    .container {
-        width: 95%;
-        padding: 15px;
-    }
-}
-
 button {
     display: block;
     width: 100%; /* 버튼의 너비를 100%로 설정 */
@@ -117,12 +126,7 @@ th {
     font-weight: bold;
 }
 
-.footer {
-    text-align: center;
-    margin-top: 30px;
-    font-size: 14px;
-    color: #868e96;
-}
+
 
 .replySpan_editReply {
     display: flex;
@@ -156,4 +160,19 @@ th {
 
 .table tr:hover {
     background-color: #f1f1f1; /* 호버 시 배경색 변화 */
+}
+
+/* 반응형 디자인을 위한 미디어 쿼리 */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: #868e96;
 }

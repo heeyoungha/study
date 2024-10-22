@@ -1,6 +1,6 @@
 package com.example.study.board.reply;
 
-import com.example.study.BaseEntity;
+import com.example.study.common.BaseEntity;
 import com.example.study.board.Board;
 import com.example.study.user.User;
 import jakarta.persistence.*;

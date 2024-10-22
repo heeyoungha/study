@@ -1,15 +1,12 @@
 package com.example.study.projectUser;
 
-import com.example.study.BaseEntity;
+import com.example.study.common.BaseEntity;
 import com.example.study.project.Project;
 import com.example.study.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DialectOverride;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;

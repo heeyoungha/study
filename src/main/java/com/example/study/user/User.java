@@ -1,7 +1,6 @@
 package com.example.study.user;
 
-import com.example.study.BaseEntity;
-import com.example.study.project.Project;
+인import com.example.study.common.BaseEntity;
 import com.example.study.projectUser.ProjectUser;
 import com.example.study.user.dto.UserRequest;
 import jakarta.persistence.*;
@@ -10,11 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.hibernate.annotations.Where;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "user")

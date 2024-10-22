@@ -1,6 +1,6 @@
 package com.example.study.cafe.entity;
 
-import com.example.study.BaseEntity;
+import com.example.study.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

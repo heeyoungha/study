@@ -1,13 +1,10 @@
 package com.example.study.project;
 
-import com.example.study.BaseEntity;
+import com.example.study.common.BaseEntity;
 import com.example.study.projectUser.ProjectUser;
-import com.example.study.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
 @Entity
 @Getter

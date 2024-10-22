@@ -1,6 +1,6 @@
 package com.example.study.board;
 
-import com.example.study.BaseEntity;
+import com.example.study.common.BaseEntity;
 import com.example.study.board.reply.Reply;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
