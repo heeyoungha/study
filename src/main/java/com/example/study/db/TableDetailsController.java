@@ -1,7 +1,6 @@
-package com.example.study;
+package com.example.study.db;
 
-import com.example.study.DatabaseMetadataService;
-import org.hibernate.metamodel.mapping.TableDetails;
+import com.example.study.db.DatabaseMetadataService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

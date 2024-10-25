@@ -1,4 +1,4 @@
-package com.example.study;
+package com.example.study.db;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
