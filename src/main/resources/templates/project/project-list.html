@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Project Management</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> <!-- Bootstrap CSS 추가 -->
+  <link rel="stylesheet" th:href="@{/css/nav.css}">
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 1200px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .project-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+    }
+
+    .project-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      color: #495057;
+    }
+
+    .project-name {
+      flex-grow: 1;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .project-name:hover {
+      color: #007bff;
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    input {
+      width: 100%;
+      max-width: 300px;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-edit {
+      background-color: #28a745;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+
+    .close {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: 95%;
+        padding: 15px;
+      }
+
+      .project-item {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .project-actions {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 공통 네비게이션 불러오기 -->
+  <div th:replace="~{fragment/nav :: navigation}"></div>
+
+  <h1>Project Management</h1>
+  <ul id="project-list" class="project-list">
+  </ul>
+
+  <form>
+    <button id="create-project-form" type="submit">Create Project</button>
+  </form>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Edit Project</h2>
+    <form id="edit-project-form">
+      <input type="text" id="edit-project-name" required>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const projectList = document.getElementById('project-list');
+    const editModal = document.getElementById('editModal');
+    const closeBtn = document.querySelector('.close');
+    let currentProjectId = null;
+
+    // 프로젝트 목록 로드
+    function loadProjects() {
+      fetch('/v1/api/project')
+              .then(response => {
+                console.log(response);
+                if (!response.ok) throw new Error('Failed to fetch projects');
+                return response.json();
+              })
+              .then(projects => {
+                projectList.innerHTML = '';
+                projects.forEach(project => {
+                  addProjectToList(project);
+                });
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load projects');
+              });
+    }
+
+    // 프로젝트 항목 그리기
+    function addProjectToList(project) {
+      const li = document.createElement('li');
+      li.className = 'project-item';
+      li.innerHTML = `
+                    <span class="project-name" data-id="${project.id}">${project.title}</span>
+                    <div class="project-actions">
+                        <button class="btn-edit" onclick="editProject(${project.id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteProject(${project.id})">Delete</button>
+                    </div>
+                `;
+      projectList.appendChild(li);
+
+      // 프로젝트 이름 클릭 시 상세 정보 조회
+      li.querySelector('.project-name').addEventListener('click', () => {
+        fetch(`/v1/api/project/${project.id}`)
+                .then(response => {
+                  if (!response.ok) throw new Error('Failed to fetch project details');
+                  return response.json();
+                })
+                .then(projectDetails => {
+                  alert(`Project Details:\nName: ${projectDetails.name}\nID: ${projectDetails.id}`);
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Failed to load project details');
+                });
+      });
+    }
+
+    // 생성 버튼 클릭
+    document.getElementById('create-project-form').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = '/v1/project/create';
+    });
+
+    // 수정 버튼 클릭
+    window.editProject = function(id) {
+      window.location.href = `/v1/project/create?id=${id}`;
+    };
+
+    // 프로젝트 삭제
+    window.deleteProject = function(id) {
+      if (confirm('Are you sure you want to delete this project?')) {
+        fetch(`/v1/api/project/${id}`, {
+          method: 'DELETE',
+        })
+                .then(response => {
+                  if (!response.ok) throw new Error('Failed to delete project');
+                  loadProjects();
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Failed to delete project');
+                });
+      }
+    };
+
+    // 수정 모달 폼 제출
+    document.getElementById('edit-project-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const newName = document.getElementById('edit-project-name').value;
+
+      fetch(`/v1/api/project/${currentProjectId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+      })
+              .then(response => {
+                if (!response.ok) throw new Error('Failed to update project');
+                loadProjects();
+                editModal.style.display = 'none';
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update project');
+              });
+    });
+
+    // 모달 닫기
+    closeBtn.onclick = function() {
+      editModal.style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+      if (event.target == editModal) {
+        editModal.style.display = 'none';
+      }
+    };
+
+    // 초기 프로젝트 목록 로드
+    loadProjects();
+  });
+</script>
+</body>
+</html>

@@ -12,12 +12,14 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("status <> 'DELETED'")
 public class Project extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
 
     private String startDate;
+
+    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_user_id")
@@ -27,6 +29,7 @@ public class Project extends BaseEntity {
         Project project = new Project();
         project.title = title;
         project.startDate = startDate;
+        project.status = "ACTIVE";
         return project;
     }
 
