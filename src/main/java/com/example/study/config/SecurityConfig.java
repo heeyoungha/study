@@ -1,10 +1,12 @@
 package com.example.study.config;
 
 import com.example.study.user.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -34,7 +36,17 @@ public class SecurityConfig {
                 .oauth2Login((oauth2) -> oauth2
                         .loginPage("/login")
                         .userInfoEndpoint((userInfoEndpointConfig) ->
-                                userInfoEndpointConfig.userService(customOAuth2UserService)));
+                                userInfoEndpointConfig.userService(customOAuth2UserService))
+                        .successHandler((request, response, authentication) -> {
+                            // 성공적인 OAuth2 로그인 후 세션에 사용자 정보를 저장
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            HttpSession session = request.getSession();
+                            session.setAttribute("user", oAuth2User.getAttributes());
+
+                            // 로그인 후 리다이렉트
+                            response.sendRedirect("/");
+                        })
+                );
 
         // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
         http

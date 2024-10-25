@@ -52,38 +52,44 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User existData = userRepository.findByUsername(username);
 
         String role = "ROLE_USER";
-
+        User user;
         if (existData == null) {
 
-            User user = User.builder()
+            user = User.builder()
                     .username(username)
                     .email(oAuth2Response.getEmail())
                     .role(role)
                     .build();
 
-            userRepository.save(user);
+            user = userRepository.save(user);
         }
         else {
 
             existData.updatOauthUser(username, oAuth2Response.getEmail());
             role = existData.getRole();
 
-            userRepository.save(existData);
+            user = userRepository.save(existData);
         }
 
 
-        return new CustomOAuth2User(oAuth2Response, role);
+        return new CustomOAuth2User(oAuth2Response, role, user.getId());
     }
 
     public static class CustomOAuth2User implements OAuth2User {
 
         private final OAuth2Response oAuth2Response;
         private final String role;
+        private final Long userId;
 
-        public CustomOAuth2User(OAuth2Response oAuth2Response, String role) {
+        public CustomOAuth2User(OAuth2Response oAuth2Response, String role, Long id) {
 
             this.oAuth2Response = oAuth2Response;
             this.role = role;
+            this.userId = id;
+        }
+
+        public Long getUserId() {
+            return userId;
         }
 
         @Override
