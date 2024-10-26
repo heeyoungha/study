@@ -52,6 +52,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()  // 정적 리소스 경로 허용
+                        .requestMatchers("/oauth2/**").permitAll()  // OAuth2 관련 경로 허용
                         .anyRequest().authenticated());  // 그 외 모든 요청은 인증 필요
 
         return http.build();
