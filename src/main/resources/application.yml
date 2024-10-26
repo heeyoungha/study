@@ -91,7 +91,7 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://sopt.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/sopt
+    url: jdbc:mysql://sopt.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/sopt?useSSL=false&serverTimezone=UTC
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
   jackson:

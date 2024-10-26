@@ -6,15 +6,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 @SpringBootApplication
-@EnableJpaAuditing
 @EntityScan(basePackages = "com.example")
 public class StudyApplication {
 
