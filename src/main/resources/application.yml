@@ -73,6 +73,7 @@ spring:
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
+
 server:
   forward-headers-strategy: NATIVE
   tomcat:
