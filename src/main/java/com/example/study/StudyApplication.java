@@ -7,13 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.example")
+@EnableJpaAuditing
+@EnableTransactionManagement
 public class StudyApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(StudyApplication.class);
