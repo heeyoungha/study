@@ -15,18 +15,6 @@ spring:
   config:
     activate:
       on-profile: common   # application-common.yml ? ??? ??
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 1093062512798-2od4q9a5p467gptto7a4o56uvkfsmm91.apps.googleusercontent.com
-            client-secret: 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
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            authorization-grant-type: authorization_code
-            scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
-              - profile
-              - email
 
 kakao:
   rest:
@@ -73,6 +61,19 @@ spring:
       show-sql: true
     properties:
       hibernate.dialect: org.hibernate.dialect.MariaDBDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1093062512798-2od4q9a5p467gptto7a4o56uvkfsmm91.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
+              - profile
+              - email
+
 
 logging:
   level:
@@ -105,6 +106,18 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1093062512798-2od4q9a5p467gptto7a4o56uvkfsmm91.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
+              - profile
+              - email
 
 logging:
   level:
