@@ -115,21 +115,25 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1093062512798-2od4q9a5p467gptto7a4o56uvkfsmm91.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: https://www.letsadam.link/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
+              - profile
+              - email
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
     org.hibernate.SQL: DEBUG
-    org.hibernate.tool.hbm2ddl : TRACE
-    org.hibernate.tool.schema: TRACE
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.hibernate.type.descriptor.sql: TRACE
-    com.zaxxer.hikari: DEBUG
-    org.springframework.jdbc: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
-
-
+    org.hibernate.tool.schema.internal.SchemaCreatorImpl: TRACE
+    org.springframework.security: DEBUG
 
 cafe:
   recommendation:
