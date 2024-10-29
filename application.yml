@@ -73,12 +73,6 @@ spring:
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
-            user-name-attribute: sub
 
 
 logging:
@@ -124,6 +118,12 @@ spring:
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
+            user-name-attribute: sub
 
 logging:
   level:
