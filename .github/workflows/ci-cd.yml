@@ -25,10 +25,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      - name: Check if JAR file exists
+      - name: Check if JAR file exists and copy to Docker context
         run: |
           if [ -f build/libs/app.jar ]; then
             echo "JAR file exists."
+            cp build/libs/app.jar .
           else
             echo "JAR file not found."
             exit 1
@@ -47,7 +48,6 @@ jobs:
       - name: Push to DockerHub
         run: |
           docker push heeyoungha/study-app:latest
-          docker tag heeyoungha/study-app:latest heeyoungha/study-app:${{ github.sha }}
           docker push heeyoungha/study-app:${{ github.sha }}
 
       - name: Set up SSH key
@@ -79,9 +79,10 @@ jobs:
           ssh -vvv -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             cd study
             git pull origin main  
-            docker-compose pull  
             docker-compose down
-            docker-compose up -d --build
+            docker system prune -f
+            docker-compose pull  
+            docker-compose up -d
           '
       
 
