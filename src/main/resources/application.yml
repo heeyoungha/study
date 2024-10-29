@@ -127,16 +127,8 @@ spring:
 
 logging:
   level:
-    root: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.tool.hbm2ddl : TRACE
-    org.hibernate.tool.schema: TRACE
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.hibernate.type.descriptor.sql: TRACE
-    com.zaxxer.hikari: DEBUG
-    org.springframework.jdbc: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
 
 
 
