@@ -38,4 +38,8 @@ public class Project extends BaseEntity {
         this.startDate = startDate;
     }
 
+    public void delete() {
+        this.status = "DELETED";
+    }
+
 }

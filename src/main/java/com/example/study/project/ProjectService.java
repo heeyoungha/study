@@ -5,6 +5,8 @@ import com.example.study.project.dto.ProjectResponse;
 import com.example.study.user.User;
 import com.example.study.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ public class ProjectService {
     public void deleteProject(Long id) {
         Project project = projectRepository.findById(id).orElseThrow();
         project.delete();
+        projectRepository.save(project); // 상태가 변경된 프로젝트 저장
     }
 
     @Transactional
