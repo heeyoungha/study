@@ -22,12 +22,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // HTTPS 설정 수정
-        http
-                .requiresChannel(channel -> channel
-                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                        .requiresSecure()
-                );
 
         http
                 .csrf((csrf) -> csrf.disable())

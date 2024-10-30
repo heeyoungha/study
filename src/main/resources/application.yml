@@ -95,15 +95,6 @@ cafe:
     base:
       url: http://localhost:8080/dir/ # 고정 ip 할당 받은 후 변경 예정
 ---
-server:
-  forward-headers-strategy: NATIVE
-  tomcat:
-    remoteip:
-      remote-ip-header: X-Forwarded-For
-      protocol-header: X-Forwarded-Proto
-    use-forward-headers: true  # 이 설정은 deprecated되었으므로 제거
-  ssl:
-    enabled: true  # SSL 활성화
 spring:
   config:
     activate:
@@ -136,7 +127,16 @@ spring:
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
-
+server:
+  ssl:
+    enabled: true
+    key-store: /etc/letsencrypt/live/www.letsadam.link/fullchain.pem
+    key-store-password: "" # Let's Encrypt 인증서의 경우 비밀번호가 없으므로 비워둡니다.
+    key-store-type: PEM
+    key-alias: www.letsadam.link
+    key-password: ""
+    key-store-provider: SunX509
+  port: 443
 logging:
   level:
     root: INFO
