@@ -22,10 +22,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // HTTPS 강제 설정 추가
+        // HTTPS 설정 수정
         http
                 .requiresChannel(channel -> channel
-                        .anyRequest().requiresSecure());
+                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                        .requiresSecure()
+                );
 
         http
                 .csrf((csrf) -> csrf.disable())
