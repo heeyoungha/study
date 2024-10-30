@@ -128,15 +128,11 @@ spring:
               - profile
               - email
 server:
-  ssl:
-    enabled: true
-    key-store: /etc/letsencrypt/live/www.letsadam.link/fullchain.pem
-    key-store-password: "" # Let's Encrypt 인증서의 경우 비밀번호가 없으므로 비워둡니다.
-    key-store-type: PEM
-    key-alias: www.letsadam.link
-    key-password: ""
-    key-store-provider: SunX509
-  port: 443
+  forward-headers-strategy: NATIVE
+  tomcat:
+    remote-ip-header: X-Forwarded-For
+    protocol-header: X-Forwarded-Proto
+
 logging:
   level:
     root: INFO
