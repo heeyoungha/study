@@ -95,6 +95,13 @@ cafe:
     base:
       url: http://localhost:8080/dir/ # 고정 ip 할당 받은 후 변경 예정
 ---
+server:
+  forward-headers-strategy: FRAMEWORK
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+    use-forward-headers: true
 spring:
   config:
     activate:

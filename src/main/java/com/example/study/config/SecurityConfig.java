@@ -22,17 +22,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // HTTPS 강제 설정 추가
+        http
+                .requiresChannel(channel -> channel
+                        .anyRequest().requiresSecure());
 
         http
-                .csrf((csrf) -> csrf.disable());
-
-        http
-                .formLogin((login) -> login.disable());
-
-        http
-                .httpBasic((basic) -> basic.disable());
-
-        http
+                .csrf((csrf) -> csrf.disable())
+                .formLogin((login) -> login.disable())
+                .httpBasic((basic) -> basic.disable())
                 .oauth2Login((oauth2) -> oauth2
                         .loginPage("/login")
                         .userInfoEndpoint((userInfoEndpointConfig) ->
@@ -46,10 +44,8 @@ public class SecurityConfig {
                             // 로그인 후 리다이렉트
                             response.sendRedirect("/");
                         })
-                );
-
-        // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
-        http
+                )
+                // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/login/oauth2/**").permitAll()  // OAuth2 콜백 경로 추가
                         .anyRequest().authenticated());
