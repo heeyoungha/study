@@ -51,8 +51,8 @@ public class SecurityConfig {
         // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()  // 정적 리소스 경로 허용
-                        .anyRequest().authenticated());  // 그 외 모든 요청은 인증 필요
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/login/oauth2/**").permitAll()  // OAuth2 콜백 경로 추가
+                        .anyRequest().authenticated());
 
         return http.build();
     }
