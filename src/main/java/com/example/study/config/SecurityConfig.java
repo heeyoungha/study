@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -33,27 +34,25 @@ public class SecurityConfig {
                 .httpBasic((basic) -> basic.disable());
 
         http
-                .oauth2Login((oauth2) -> oauth2
-                        .loginPage("/login")
-                        .userInfoEndpoint((userInfoEndpointConfig) ->
-                                userInfoEndpointConfig.userService(customOAuth2UserService))
-                        .successHandler((request, response, authentication) -> {
-                            // 성공적인 OAuth2 로그인 후 세션에 사용자 정보를 저장
-                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                            HttpSession session = request.getSession();
-                            session.setAttribute("user", oAuth2User.getAttributes());
-
-                            // 로그인 후 리다이렉트
-                            response.sendRedirect("/");
-                        })
-                );
+                .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                        .userService(customOAuth2UserService))
+                .successHandler((request, response, authentication) -> {
+                    // 성공적인 OAuth2 로그인 후 SecurityContextHolder에 사용자 정보 저장
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    response.sendRedirect("/");
+                })
+        );
 
         // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/login/oauth2/**").permitAll()  // OAuth2 콜백 경로 추가
-                        .anyRequest().authenticated());
-
+                .requestMatchers("/", "/css/**", "/js/**", "/images/**")
+                .permitAll()
+                .requestMatchers("/login")
+                .anonymous()
+                .anyRequest().authenticated());
         return http.build();
     }
 
