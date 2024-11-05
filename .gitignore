@@ -35,6 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
-
-
 .env
+
+jdk17.deb
+jdk17.rpm
+
+certbot/conf/archive/
+certbot/conf/live/
