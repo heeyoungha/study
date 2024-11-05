@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ temp ]
+    branches: [ feature/temp ]
 
 jobs:
   build-and-deploy:
@@ -23,10 +23,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      - name: Check if JAR file exists
+      - name: Check if JAR file exists and copy to Docker context
         run: |
           if [ -f build/libs/app.jar ]; then
             echo "JAR file exists."
+            cp build/libs/app.jar .
           else
             echo "JAR file not found."
             exit 1
@@ -35,7 +36,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build --no-cache -t heeyoungha/study-app:latest .
-          docker build --no-cache -t heeyoungha/study-app:${{ github.sha }} .
+          docker tag heeyoungha/study-app:latest heeyoungha/study-app:${{ github.sha }}
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -45,7 +46,6 @@ jobs:
       - name: Push to DockerHub
         run: |
           docker push heeyoungha/study-app:latest
-          docker tag heeyoungha/study-app:latest heeyoungha/study-app:${{ github.sha }}
           docker push heeyoungha/study-app:${{ github.sha }}
 
       - name: Set up SSH key
@@ -53,32 +53,13 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" | tr -d '\r' > private_key
           chmod 600 private_key
 
-      - name: 비밀키 형식 확인
-        run: |
-          start_line=$(head -n 1 private_key)
-          end_line=$(tail -n 1 private_key)
-          
-          if [[ "$start_line" == "-----BEGIN RSA PRIVATE KEY-----" && "$end_line" == "-----END RSA PRIVATE KEY-----" ]]; then
-            echo "The private key is in the correct RSA format."
-          else
-            echo "The private key is not in the correct RSA format."
-            exit 1
-          fi
-
-      - name: Verify private key file
-        run: ls -l private_key
-
-      - name: Check private key format
-        run: |
-          echo "${{ secrets.EC2_PRIVATE_KEY }}" | tr -d '\r' > private_key
-          file private_key
       - name: SSH and deploy
         run: |
           ssh -vvv -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             cd study
-            docker-compose pull
             docker-compose down
-            docker-compose up -d --build
+            docker image prune -f
+            docker volume prune -f
+            docker-compose pull  
+            docker-compose up -d
           '
-      
-
