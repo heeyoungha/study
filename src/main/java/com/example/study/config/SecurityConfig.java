@@ -25,25 +25,22 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf((csrf) -> csrf.disable());
+            .csrf((csrf) -> csrf.disable())
+            .formLogin((login) -> login.disable())
+            .httpBasic((basic) -> basic.disable());
 
         http
-                .formLogin((login) -> login.disable());
+            .oauth2Login(oauth2 -> oauth2
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/", true)
+                    .userInfoEndpoint(userInfo -> userInfo
+                            .userService(customOAuth2UserService))
+                    .authorizationEndpoint(authorization -> authorization
+                            .baseUri("/oauth2/authorization"))
+                    .redirectionEndpoint(redirection -> redirection
+                            .baseUri("/login/oauth2/code/*"))
+            );
 
-        http
-                .httpBasic((basic) -> basic.disable());
-
-        http
-                .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                        .userService(customOAuth2UserService))
-                .successHandler((request, response, authentication) -> {
-                    // 성공적인 OAuth2 로그인 후 SecurityContextHolder에 사용자 정보 저장
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    response.sendRedirect("/");
-                })
-        );
 
         // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
         http
