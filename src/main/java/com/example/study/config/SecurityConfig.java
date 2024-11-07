@@ -38,7 +38,7 @@ public class SecurityConfig {
                     .authorizationEndpoint(authorization -> authorization
                             .baseUri("/oauth2/authorization"))
                     .redirectionEndpoint(redirection -> redirection
-                            .baseUri("/login/oauth2/code/*"))
+                            .baseUri("https://letsadam.link/login/oauth2/code/*"))
             );
 
 
