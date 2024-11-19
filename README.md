@@ -55,11 +55,11 @@
 ## 🗞️ ERD & AWS 아키텍처
 - ERD
 
-![img.png](img.png)
+<img width="793" alt="erd" src="https://github.com/user-attachments/assets/a0a4c11a-c502-4fe8-9973-606f0e9aa181">
 
 - AWS 아키텍처
 
-![img_1.png](img_1.png)
+<img width="945" alt="aws아키" src="https://github.com/user-attachments/assets/44774cb0-678a-4600-a92c-1ca4935d1901">
 
 ## ETC
 
