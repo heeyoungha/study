@@ -65,12 +65,8 @@
     <h1>Welcome <span th:text="${username}">Username</span>,</h1>
     <h2>사담으로 연결되는 시간, Let's Sadam!</h2>
 
-    <nav>
-        <a href="/v1/boardList">게시판</a>
-        <a href="/v1/project">프로젝트</a>
-        <a href="/v1/user">프로필</a>
-        <a href="/v1/main">카페찾기</a>
-    </nav>
+    <!-- 공통 네비게이션 불러오기 -->
+    <div th:replace="~{fragment/nav :: navigation}"></div>
 
     <div class="content-section">
         <p>Explore various sections of the platform using the navigation menu above. You can find and interact with boards, view or create projects, check user profiles, and even find local cafes!</p>
