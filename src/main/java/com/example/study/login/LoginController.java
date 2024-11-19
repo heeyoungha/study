@@ -19,12 +19,4 @@ public class LoginController {
     public String login(){
         return "login/login";
     }
-    @GetMapping("/css/**")
-    public ResponseEntity<Resource> serveCss(HttpServletRequest request) {
-        String cssFile = request.getRequestURI().substring(request.getContextPath().length());
-        Resource resource = new ClassPathResource("static" + cssFile); // 리소스 경로 지정
-        return ResponseEntity.ok()
-                .contentType(MediaType.valueOf("text/css")) // MIME 타입 설정
-                .body(resource);
-    }
 }
