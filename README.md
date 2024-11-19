@@ -51,3 +51,25 @@
 
 ### 6️⃣ CI / CD 자동화
 - GitHub Actions를 사용한 빌드 및 배포 자동화
+
+## 🗞️ ERD & AWS 아키텍처
+- ERD
+
+![img.png](img.png)
+
+- AWS 아키텍처
+
+![img_1.png](img_1.png)
+
+## ETC
+
+- 커밋 컨벤션
+  - feat: 새로운 기능 추가
+  - fix: 버그 수정
+  - docs: 문서 변경
+  - style: 코드 스타일 변경 (기능에 영향을 주지 않음)
+  - refactor: 코드 리팩토링 (기능 변화는 없고, 코드 개선)
+  - chore: 그 외 잡다한 작업 (빌드 도구, 패키지 관리자, 라이브러리 업데이트 등)
+  - ci: CI 설정 파일 수정
+  - build: 빌드 관련 파일 수정
+  
