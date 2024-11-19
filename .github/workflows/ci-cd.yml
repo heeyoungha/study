@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ feature/temp ]
+    branches: [ dev ]
 
 jobs:
   build-and-deploy:
@@ -57,7 +57,7 @@ jobs:
         run: |
           ssh -vvv -o StrictHostKeyChecking=no -i private_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
             cd study
-            git pull origin feature/temp
+            git pull origin dev
             docker-compose down
             docker image prune -f
             docker volume prune -f
