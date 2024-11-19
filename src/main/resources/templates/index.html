@@ -20,7 +20,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
+        h1, h2 {
             text-align: center;
             margin-bottom: 40px;
         }
@@ -62,7 +62,8 @@
 <body>
 
 <div id="contents">
-    <h1>Welcome to the Landing Page</h1>
+    <h1>Welcome <span th:text="${username}">Username</span>,</h1>
+    <h2>사담으로 연결되는 시간, Let's Sadam!</h2>
 
     <nav>
         <a href="/v1/boardList">게시판</a>

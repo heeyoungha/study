@@ -3,6 +3,8 @@ package com.example.study.user;
 import com.example.study.user.dto.GoogleReponse;
 import com.example.study.user.dto.NaverResponse;
 import com.example.study.user.dto.OAuth2Response;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -19,6 +21,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     //DefaultOAuth2UserService OAuth2UserService의 구현체
 
     private final UserRepository userRepository;
+
+    @Autowired
+    private HttpSession session;
 
     public CustomOAuth2UserService(UserRepository userRepository) {
 
@@ -48,8 +53,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return null;
         }
 
-        String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        String username = oAuth2Response.getName();
         User existData = userRepository.findByUsername(username);
+
+        // 로그인 성공 시 세션에 username 저장
+        session.setAttribute("username", username);
 
         String role = "ROLE_USER";
         User user;
@@ -70,7 +78,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             user = userRepository.save(existData);
         }
-
 
         return new CustomOAuth2User(oAuth2Response, role, user.getId());
     }
