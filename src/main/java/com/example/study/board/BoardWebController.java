@@ -26,12 +26,12 @@ public class BoardWebController {
     public String list(Model model,
                        @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC)
             Pageable pageable,
-                       @RequestParam(required = false) String searchTitle
+                       @RequestParam(required = false) String searchKeyword
     ) {
         try {
-            logger.info("Entering list method with searchTitle: {}, pageable: {}", searchTitle, pageable);
+            logger.info("Entering list method with searchTitle: {}, pageable: {}", searchKeyword, pageable);
 
-            Page<BoardDto> boardDtoPage = boardService.boardSearchList(searchTitle, pageable);
+            Page<BoardDto> boardDtoPage = boardService.boardSearchList(searchKeyword, pageable);
 
             int nowPage = boardDtoPage.getPageable().getPageNumber() + 1; //pageable에서 넘어온 현재페이지를 가지고올수있다 * 0부터시작하니까 +1
             int startPage = Math.max(nowPage - 4, 1); //매개변수로 들어온 두 값을 비교해서 큰값을 반환

@@ -47,7 +47,7 @@
     </table>
 
     <!-- 검색기능 -->
-    <form th:action="@{/}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
+    <form th:action="@{/v1/boardList}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
         <input type="text" name="searchKeyword" class="form-control" placeholder="검색어를 입력하세요">
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary">검색</button>
