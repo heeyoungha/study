@@ -25,31 +25,37 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            .csrf((csrf) -> csrf.disable())
-            .formLogin((login) -> login.disable())
-            .httpBasic((basic) -> basic.disable());
+                .csrf((csrf) -> csrf.disable());
 
         http
-            .oauth2Login(oauth2 -> oauth2
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/", true)
-                    .userInfoEndpoint(userInfo -> userInfo
-                            .userService(customOAuth2UserService))
-                    .authorizationEndpoint(authorization -> authorization
-                            .baseUri("/oauth2/authorization"))
-                    .redirectionEndpoint(redirection -> redirection
-                            .baseUri("https://letsadam.link/login/oauth2/code/*"))
-            );
+                .formLogin((login) -> login.disable());
 
+        http
+                .httpBasic((basic) -> basic.disable());
+
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint((userInfoEndpointConfig) ->
+                                userInfoEndpointConfig.userService(customOAuth2UserService))
+                        .successHandler((request, response, authentication) -> {
+                            // 성공적인 OAuth2 로그인 후 세션에 사용자 정보를 저장
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            HttpSession session = request.getSession();
+                            session.setAttribute("user", oAuth2User.getAttributes());
+
+                            // 로그인 후 리다이렉트
+                            response.sendRedirect("/v1");
+                        })
+                );
 
         // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
         http
                 .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/", "/css/**", "/js/**", "/images/**")
-                .permitAll()
-                .requestMatchers("/login")
-                .anonymous()
-                .anyRequest().authenticated());
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()  // 정적 리소스 경로 허용
+                        .requestMatchers("/oauth2/**").permitAll()  // OAuth2 관련 경로 허용
+                        .anyRequest().authenticated());  // 그 외 모든 요청은 인증 필요
+
         return http.build();
     }
 
