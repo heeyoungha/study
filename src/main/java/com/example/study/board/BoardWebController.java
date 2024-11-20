@@ -24,7 +24,7 @@ public class BoardWebController {
 
     @GetMapping(value = {"/boardList"})
     public String list(Model model,
-                       @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC)
+                       @PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC)
             Pageable pageable,
                        @RequestParam(required = false) String searchKeyword
     ) {
@@ -41,6 +41,7 @@ public class BoardWebController {
             model.addAttribute("nowPage", nowPage);
             model.addAttribute("startPage", startPage);
             model.addAttribute("endPage", endPage);
+            model.addAttribute("searchKeyword", searchKeyword);
 
             logger.info("Returning view: board/get-boardlist");
             return "board/get-boardlist";
