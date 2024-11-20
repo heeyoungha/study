@@ -3,6 +3,10 @@ package com.example.study.project;
 import com.example.study.project.dto.ProjectRequest;
 import com.example.study.project.dto.ProjectResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +36,10 @@ public class ProjectApiController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> readProjectList(){
-        List<ProjectResponse> response = projectService.readProjectList();
+    public ResponseEntity<Page<ProjectResponse>> readProjectList(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC)
+                                                                     Pageable pageable,
+                                                                 @RequestParam(required = false) String searchKeyword){
+        Page<ProjectResponse> response = projectService.readProjectList(searchKeyword, pageable);
         return ResponseEntity.ok(response);
     }
 

@@ -1,154 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Project Management</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> <!-- Bootstrap CSS 추가 -->
+  <title>Project</title>
   <link rel="stylesheet" th:href="@{/css/nav.css}">
   <link rel="stylesheet" th:href="@{/css/common.css}">
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      padding: 40px;
-      margin: 0;
-    }
-
-    .container {
-      width: 80%;
-      max-width: 1200px;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 30px;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .project-list {
-      list-style: none;
-      padding: 0;
-      margin-bottom: 30px;
-    }
-
-    .project-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #eee;
-      color: #495057;
-    }
-
-    .project-name {
-      flex-grow: 1;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .project-name:hover {
-      color: #007bff;
-    }
-
-    .project-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    input {
-      width: 100%;
-      max-width: 300px;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    button {
-      padding: 8px 16px;
-      font-size: 14px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .btn-edit {
-      background-color: #28a745;
-    }
-
-    .btn-delete {
-      background-color: #dc3545;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-      position: relative;
-      background-color: #fff;
-      margin: 15% auto;
-      padding: 20px;
-      width: 80%;
-      max-width: 500px;
-      border-radius: 10px;
-    }
-
-    .close {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        width: 95%;
-        padding: 15px;
-      }
-
-      .project-item {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .project-actions {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> <!-- Bootstrap CSS 추가 -->
 </head>
 <body>
 <div class="container">
@@ -162,6 +18,70 @@
   <form>
     <button id="create-project-form" type="submit">Create Project</button>
   </form>
+
+  <table class="table table-hover"> <!-- Bootstrap 클래스 추가 -->
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>프로젝트</th>
+      <th>시작일자</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <!-- CONTENTS -->
+    <tr th:each="project, index : ${projectList}">
+      <td>
+        <span th:text="${project.id}"></span>
+      </td>
+      <td>
+        <a th:href="@{'/v1/project/'+ ${project.id}}">
+          <span th:text="${project.title}"></span>
+        </a>
+      </td>
+      <td>
+        <span th:text="${project.startDate}"></span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 검색기능 -->
+  <form th:action="@{/v1/project}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
+    <input type="text" name="searchKeyword" class="form-control" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
+    <div class="input-group-append">
+      <button type="submit" class="btn btn-primary">검색</button>
+    </div>
+  </form>
+
+  <!-- 페이징 -->
+  <div th:if="${!projectList.isEmpty()}" class="pagination-container">
+    <ul class="pagination"
+        th:with="
+                    pageNumber = ${projectList.pageable.pageNumber},
+                    pageSize = ${projectList.pageable.pageSize},
+                    totalPages = ${projectList.totalPages},
+                    startPage = ${T(java.lang.Math).floor(pageNumber / pageSize) * pageSize + 1},
+                    tempEndPage = ${startPage + pageSize - 1},
+                    endPage = (${tempEndPage < totalPages ? tempEndPage : totalPages})">
+
+      <li th:classappend="${projectList.first} ? 'disabled'" class="page-item">
+        <a class="page-link" th:href="${projectList.first} ? '#' : @{/(page=${pageNumber - 1})}">
+          <span aria-hidden="true"><</span>
+        </a>
+      </li>
+
+      <li th:each="page: ${#numbers.sequence(startPage, endPage)}" th:classappend="${page == pageNumber + 1} ? 'active'" class="page-item">
+        <a th:text="${page}" class="page-link" th:href="@{/(page=${page - 1})}"></a>
+      </li>
+
+      <li th:classappend="${projectList.last} ? 'disabled'" class="page-item">
+        <a class="page-link" th:href="${projectList.last} ? '#' : @{/(page=${pageNumber + 1})}" aria-label="Next">
+          <span aria-hidden="true">&gt;</span>
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <!-- Edit Modal -->
@@ -183,25 +103,6 @@
     const closeBtn = document.querySelector('.close');
     let currentProjectId = null;
 
-    // 프로젝트 목록 로드
-    function loadProjects() {
-      fetch('/v1/api/project')
-              .then(response => {
-                console.log(response);
-                if (!response.ok) throw new Error('Failed to fetch projects');
-                return response.json();
-              })
-              .then(projects => {
-                projectList.innerHTML = '';
-                projects.forEach(project => {
-                  addProjectToList(project);
-                });
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to load projects');
-              });
-    }
 
     // 프로젝트 항목 그리기
     function addProjectToList(project) {
