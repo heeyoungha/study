@@ -72,4 +72,42 @@
   - chore: 그 외 잡다한 작업 (빌드 도구, 패키지 관리자, 라이브러리 업데이트 등)
   - ci: CI 설정 파일 수정
   - build: 빌드 관련 파일 수정
+
+<br>
+
+<details>
+<summary><b> ✅ 프로젝트 소개 펼치기</b></summary>
+<div markdown="1">
+  🧷 랜딩 페이지
   
+<img width="945" alt="111" src="https://github.com/user-attachments/assets/3b991d03-9ad9-4970-9f23-f488cd5d43df">
+  
+  🧷 게시판 - 조회
+  
+<img width="945" alt="444" src="https://github.com/user-attachments/assets/623fbfca-81ee-4797-9b61-9b8d1c01ca06">
+  
+  🧷 게시판 - 검색
+  
+<img width="945" alt="333" src="https://github.com/user-attachments/assets/f0387ce9-6d40-4a0e-957b-f6f70b78244a">
+
+  🧷 프로젝트 - 조회
+  
+<img width="945" alt="666" src="https://github.com/user-attachments/assets/668e00dc-676f-4780-9579-de4e559b9d16">  
+  
+  🧷 프로젝트 - 검색
+  
+<img width="945" alt="555" src="https://github.com/user-attachments/assets/73809585-fdff-4046-9e39-383b6ced0923">
+
+  🧷 카페 찾기 검색  
+
+<img width="945" alt="777" src="https://github.com/user-attachments/assets/828240d9-0a43-409a-9bfb-1993a9a7ffe7">
+
+  🧷 카페 찾기 검색결과 
+
+<img width="945" alt="888" src="https://github.com/user-attachments/assets/3eca821d-d67f-463b-9a54-97f5144f17a2">
+
+
+
+
+</div>
+</details>
