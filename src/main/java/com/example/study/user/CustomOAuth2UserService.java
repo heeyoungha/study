@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     //DefaultOAuth2UserService OAuth2UserService의 구현체
 
@@ -33,11 +35,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
+        log.info("OAuth2 User Request Details: {}", userRequest);
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        System.out.println(oAuth2User.getAttributes());
+
+        log.debug("OAuth2 User Attributes: {}", oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        log.info("Authentication Registration ID: {}", registrationId);
+
         OAuth2Response oAuth2Response = null;
 
         if (registrationId.equals("naver")) {
