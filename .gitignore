@@ -42,3 +42,8 @@ jdk17.rpm
 
 certbot/conf/archive/
 certbot/conf/live/
+
+src/main/resources/application-local.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
+src/main/resources/application.yml
