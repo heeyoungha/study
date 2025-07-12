@@ -1,12 +1,9 @@
 spring:
   profiles:
     group:
-      local:  # local, common profile? ???? ?? ?????? ??
-        - common
-      prod:   # prod, common profile? ???? ?? ?????? ??
-        - common
-      dev:
-        - common
+      local: [common, local]
+      prod: [common, prod]
+      dev: [common, dev]
 
 ---
 spring:
@@ -25,8 +22,6 @@ kakao:
     api:
       key: ${KAKAO_REST_API_KEY}
 
-
-
 ---
 spring:
   config:
@@ -41,6 +36,9 @@ spring:
     hibernate:
       ddl-auto: update # prod 배포시 validate
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
   security:
     oauth2:
       client:
@@ -53,6 +51,18 @@ spring:
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
+
+# local 프로필용 설정들
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+
+kakao:
+  rest:
+    api:
+      key: ${KAKAO_REST_API_KEY}
+
 cafe:
   recommendation:
     base:
