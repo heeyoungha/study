@@ -1,15 +1,66 @@
-version: "3.8"                                          # 파일 규격 버전
-services:                                               # 이 항목 밑에 실행하려는 컨테이너들을 정의
-  study-database:
-    container_name: study-database
-    build:
-      dockerfile: Dockerfile
-      context: ./database
-    image: heeyoungha/study-database
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: study-mysql
+    restart: always
     environment:
-      - MYSQL_DATABASE=study-version
-      - MYSQL_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-    volumes:
-      - ./database/config:/etc/mysql/conf.d
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_DATABASE: study
+      MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     ports:
-      - "3306:3306"      # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
+      - "3306:3306"
+    volumes:
+      - mysql-data-dev:/var/lib/mysql
+    networks:
+      - backend
+  app:
+    image: study:latest
+    container_name: study-app
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - TZ=Asia/Seoul
+      - JAVA_OPTS=-Xms256m -Xmx768m
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=study
+      - DB_USER=${SPRING_DATASOURCE_USERNAME}
+      - DB_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: study-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d/app-dev.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on:
+      - app
+    networks:
+      - backend
+  
+  certbot:
+    image: certbot/certbot
+    container_name: study-certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: ""
+    command: /bin/sh -c "sleep infinity"
+
+networks:
+  backend:
+    driver: bridge
