@@ -22,6 +22,7 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - CAFE_RECOMMENDATION_BASE_URL=http://localhost:8080/dir/
     env_file:
       - .env
     depends_on:
