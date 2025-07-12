@@ -23,7 +23,6 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CAFE_RECOMMENDATION_BASE_URL=http://localhost:8080/dir/
-      - DEBUG=true
     env_file:
       - .env
     depends_on:

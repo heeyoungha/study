@@ -1,7 +1,5 @@
-# default
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}  # default
     group:
       local:  # local, common profile? ???? ?? ?????? ??
         - common
@@ -14,7 +12,13 @@ spring:
 spring:
   config:
     activate:
-      on-profile: common   # application-common.yml ? ??? ??
+      on-profile: common
+
+# 공통 설정들
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
 
 kakao:
   rest:
