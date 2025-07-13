@@ -22,13 +22,16 @@ services:
     restart: always
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - TZ=Asia/Seoul
-      - JAVA_OPTS=-Xms256m -Xmx768m
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_NAME=study
-      - DB_USER=${SPRING_DATASOURCE_USERNAME}
-      - DB_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/study?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - CAFE_RECOMMENDATION_BASE_URL=https://letsadam.shop/dir/
     depends_on:
       - db
     ports:

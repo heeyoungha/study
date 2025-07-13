@@ -58,11 +58,6 @@ logging:
     root: INFO
     org.springframework.security: DEBUG
 
-kakao:
-  rest:
-    api:
-      key: ${KAKAO_REST_API_KEY}
-
 cafe:
   recommendation:
     base:
@@ -73,19 +68,17 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/study-version?allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/study?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update # prod 배포시 validate
       show-sql: true
     properties:
-      hibernate.dialect: org.hibernate.dialect.MariaDBDialect
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
   security:
     oauth2:
       client:
@@ -93,21 +86,25 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: https://letsadam.shop/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
+  # HTTPS 인식을 위한 설정
+  web:
+    resources:
+      add-mappings: false
+  # ForwardedHeaderFilter 활성화
+  forward-headers-strategy: framework
 logging:
   level:
     root: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.tool.schema.internal.SchemaCreatorImpl: TRACE
     org.springframework.security: DEBUG
 cafe:
   recommendation:
     base:
-      url: http://localhost:8080/dir/ # 고정 ip 할당 받은 후 변경 예정
+      url: https://letsadam.shop/dir/
 ---
 spring:
   config:
@@ -136,11 +133,17 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: https://letsadam.link/login/oauth2/code/google
+            redirect-uri: https://letsadam.shop/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
               - profile
               - email
+  # HTTPS 인식을 위한 설정
+  web:
+    resources:
+      add-mappings: false
+  # ForwardedHeaderFilter 활성화
+  forward-headers-strategy: framework
 
 logging:
   level:

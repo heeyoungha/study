@@ -4,6 +4,7 @@ import com.example.study.user.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ import java.io.IOException;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Value("${spring.profiles.active:local}")
+    private String activeProfile;
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
         this.customOAuth2UserService = customOAuth2UserService;
@@ -69,9 +73,15 @@ public class SecurityConfig {
             // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
             http
                     .authorizeHttpRequests((auth) -> auth
-                            .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()  // 정적 리소스 경로 허용
-                            .requestMatchers("/oauth2/**").permitAll()  // OAuth2 관련 경로 허용
+                            .requestMatchers("/check-proto", "/", "/login", "/css/**", "/js/**", "/images/**", "/oauth2/**").permitAll()  // 모든 허용 경로를 한번에 설정
                             .anyRequest().authenticated());  // 그 외 모든 요청은 인증 필요
+
+            // HTTPS 인식을 위한 설정 (dev, prod 환경에서 적용)
+            if ("dev".equals(activeProfile) || "prod".equals(activeProfile)) {
+                log.info("Enabling HTTPS requirement for {} environment", activeProfile);
+                http.requiresChannel(channel -> channel
+                        .anyRequest().requiresSecure());
+            }
 
             return http.build();
 
