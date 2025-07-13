@@ -48,4 +48,24 @@ public class ProjectWebController {
         return "project/project-form";
     }
 
+    @GetMapping("/{id}")
+    public String readProject(@PathVariable Long id, Model model) {
+        ProjectResponse response = projectService.readProject(id);
+        model.addAttribute("project", response);
+        return "project/project-detail";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editProject(@PathVariable Long id, Model model) {
+        ProjectResponse response = projectService.readProject(id);
+        model.addAttribute("project", response);
+        return "project/project-form"; // create와 동일 폼 사용
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteProject(@PathVariable Long id) {
+        projectService.deleteProject(id);
+        return "redirect:/project/list"; // 삭제 후 목록 페이지로 이동
+    }
+   
 }
