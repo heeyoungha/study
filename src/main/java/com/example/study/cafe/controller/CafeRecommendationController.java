@@ -16,7 +16,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-public class FormController {
+public class CafeRecommendationController {
 
     private final CafeRecommendationService cafeRecommendationService;
 
