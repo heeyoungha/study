@@ -1,5 +1,5 @@
 services:
-  db:
+  mysql:
     image: mysql:8.0
     container_name: study-mysql
     restart: always
@@ -15,7 +15,7 @@ services:
     networks:
       - backend
   app:
-    image: study:latest
+    image: study-app:latest
     container_name: study-app
     restart: always
     environment:
@@ -43,24 +43,18 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d/app-dev.conf:/etc/nginx/conf.d/default.conf
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
+      - /etc/letsencrypt/live/letsadam.shop:/etc/letsencrypt/live/letsadam.shop:ro
+      - /etc/letsencrypt/archive/letsadam.shop:/etc/letsencrypt/archive/letsadam.shop:ro
+      - ./src/main/resources/static:/var/www/html
     depends_on:
       - app
     networks:
       - backend
-  
-  certbot:
-    image: certbot/certbot
-    container_name: study-certbot
-    volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    entrypoint: ""
-    command: /bin/sh -c "sleep infinity"
+
 
 networks:
   backend:
