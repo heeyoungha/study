@@ -1,6 +1,7 @@
 package com.example.study.board;
 
 import com.example.study.board.reply.Reply;
+import com.example.study.common.ServiceUtil;
 import com.example.study.common.exception.DomainException;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -62,52 +63,35 @@ public class BoardService {
     }
 
     public BoardDto getBoard(Long id){
-        Optional<Board> boardWrapper = boardRepository.findById(id);
-        if(boardWrapper.isPresent())
-        {
-            Board board = boardWrapper.get();
-
-            BoardDto boardDto = BoardDto.builder()
-                    .board(board)
-                    .build();
-
-            return boardDto;
-        }
-
-        return null;
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, id, DomainException.notFindRow(id));
+        BoardDto boardDto = BoardDto.builder()
+                .board(board)
+                .build();
+        return boardDto;
     }
 
     public BoardDto updateBoard(Long id, BoardDto dto){
-        Board board = boardRepository.findById(id).orElseThrow();
-
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, id, DomainException.notFindRow(id));
         Board updatedBoard = board.toBuilder()
                 .id(dto.getId())
                 .writer(dto.getWriter())
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .build();
-
         Board savedBoard = boardRepository.save(updatedBoard);
         return new BoardDto(savedBoard);
     }
 
 
     public void deleteBoard(Long id){
-        Optional<Board> optBoard = boardRepository.findById(id);
-        if(optBoard.isPresent()){
-            Board board = optBoard.get();
-            boardRepository.deleteById(id);
-        }
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, id, DomainException.notFindRow(id));
+        boardRepository.deleteById(id);
     }
 
 
     public List<Reply> getReplyList(Long boardId){
-
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(()-> DomainException.notFindRow(boardId));
-
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, boardId, DomainException.notFindRow(boardId));
         List<Reply> replyList = board.getReplyList();
-
         return replyList;
     }
 }

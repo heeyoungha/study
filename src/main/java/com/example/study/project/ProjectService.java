@@ -5,6 +5,8 @@ import com.example.study.project.dto.ProjectRequest;
 import com.example.study.project.dto.ProjectResponse;
 import com.example.study.user.User;
 import com.example.study.user.UserRepository;
+import com.example.study.common.ServiceUtil;
+import com.example.study.common.exception.DomainException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -53,19 +55,19 @@ public class ProjectService {
     }
 
     public ProjectResponse readProject(Long id) {
-        Project project = projectRepository.findById(id).orElseThrow();
+        Project project = ServiceUtil.findByIdOrThrow(projectRepository, id, DomainException.notFindRow(id));
         ProjectResponse response = new ProjectResponse(project);
 
         return response;
     }
 
     public void deleteProject(Long id) {
-        Project project = projectRepository.findById(id).orElseThrow();
+        Project project = ServiceUtil.findByIdOrThrow(projectRepository, id, DomainException.notFindRow(id));
         project.delete();
     }
 
     public void updateProject(Long id, ProjectRequest.UpdateProjectRequest request) {
-        Project project = projectRepository.findById(id).orElseThrow();
+        Project project = ServiceUtil.findByIdOrThrow(projectRepository, id, DomainException.notFindRow(id));
 
         project.updateProject(request.getTitle(), request.getStartDate());
     }

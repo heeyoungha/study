@@ -7,6 +7,9 @@ import com.example.study.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.example.study.common.ServiceUtil;
+import com.example.study.common.exception.DomainException;
+
 import java.util.List;
 
 @Service
@@ -16,7 +19,7 @@ public class ReplyService {
     private final ReplyRepository replyRepository;
     private final BoardRepository boardRepository;
     public List<Reply> cerateReply(ReplyDto replyDto, User user, Long boardId) {
-        Board board = boardRepository.findById(boardId).orElseThrow();
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, boardId, DomainException.notFindRow(boardId));
         Reply reply = Reply.builder()
                 .board(board)
                 .user(user)

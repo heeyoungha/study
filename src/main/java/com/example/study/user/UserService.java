@@ -1,5 +1,7 @@
 package com.example.study.user;
 
+import com.example.study.common.ServiceUtil;
+import com.example.study.common.exception.DomainException;
 import com.example.study.user.dto.UserRequest;
 import com.example.study.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,20 +38,19 @@ public class UserService {
 
     @Transactional
     public UserResponse readUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow();
-
+        User user = ServiceUtil.findByIdOrThrow(userRepository, id, DomainException.notFindRow(id));
         return new UserResponse(user);
     }
 
     @Transactional
     public void deleteUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = ServiceUtil.findByIdOrThrow(userRepository, id, DomainException.notFindRow(id));
         user.delete();
     }
 
     @Transactional
     public void updateUser(Long id, UserRequest.UpdateUserRequest request) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = ServiceUtil.findByIdOrThrow(userRepository, id, DomainException.notFindRow(id));
         user.updateUser(request);
     }
 }
