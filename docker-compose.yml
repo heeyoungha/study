@@ -67,6 +67,18 @@ services:
     networks:
       - study-network
 
+  python-api:
+    build:
+      context: ./python-api
+      dockerfile: Dockerfile
+    image: python-api:latest
+    container_name: python-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - study-network
+
 networks:
   study-network:
     driver: bridge

@@ -1,0 +1,12 @@
+<h2>내 일기</h2>
+<p th:text="${text}"></p>
+
+<h3>감정 분석 결과: <span th:text="${sentiment}"></span></h3>
+
+<h3>추천 프로젝트</h3>
+<ul>
+  <li th:each="rec : ${recommendations}" th:text="${rec}"></li>
+</ul>
+
+<a href="/diary">다시 작성하기</a>
+<p th:if="${error}" th:text="${error}"></p> 
