@@ -31,4 +31,23 @@ public class ReplyService {
 
         return replyList;
     }
+
+    public Reply getReply(Long replyId) {
+        return ServiceUtil.findByIdOrThrow(replyRepository, replyId, DomainException.notFindRow(replyId));
+    }
+
+    public void updateReply(Long replyId, ReplyDto replyDto) {
+        Reply reply = ServiceUtil.findByIdOrThrow(replyRepository, replyId, DomainException.notFindRow(replyId));
+        reply.updateReply(replyDto.getContent());
+    }
+
+    public List<Reply> getReplyList(Long boardId) {
+        Board board = ServiceUtil.findByIdOrThrow(boardRepository, boardId, DomainException.notFindRow(boardId));
+        return board.getReplyList();
+    }
+
+    public void deleteReply(Long replyId) {
+        Reply reply = ServiceUtil.findByIdOrThrow(replyRepository, replyId, DomainException.notFindRow(replyId));
+        replyRepository.delete(reply);
+    }
 }

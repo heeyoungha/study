@@ -30,7 +30,7 @@ public class Board extends BaseEntity {
     @Column(length = 10, nullable= true)
     private String tag;
 
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private List<Reply> replyList;
 
     @Column(columnDefinition = "TEXT", nullable = false)
