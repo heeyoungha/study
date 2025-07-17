@@ -1,0 +1,14 @@
+<h2>내 일기</h2>
+<p>{{ text }}</p>
+
+<h3>감정 분석 결과: <span>{{ sentiment }}</span></h3>
+
+<h3>추천 프로젝트</h3>
+<ul>
+  {% for rec in recommendations %}
+    <li>{{ rec }}</li>
+  {% endfor %}
+</ul>
+
+<a href="/diary">다시 작성하기</a>
+<p>{% if error %}{{ error }}{% endif %}</p> 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>일기 목록</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<h2>일기 목록</h2>
+<table>
+    <thead>
+        <tr>
+            <th>번호</th>
+            <th>작성일</th>
+            <th>내용</th>
+            <th>감정</th>
+            <th>추천 프로젝트</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for diary in diaries %}
+        <tr>
+            <td>{{ diary.id }}</td>
+            <td>{{ diary.created_at.strftime('%Y-%m-%d %H:%M') if diary.created_at else '' }}</td>
+            <td>{{ diary.text }}</td>
+            <td>{{ diary.sentiment }}</td>
+            <td>
+                {% if diary.recommended_projects %}
+                    {% for project in diary.recommended_projects %}
+                        {{ project }}<br>
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="/diary">일기 쓰러 가기</a>
+</body>
+</html> 
