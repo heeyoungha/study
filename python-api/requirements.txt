@@ -1,2 +1,8 @@
 fastapi
-uvicorn 
+uvicorn
+sqlalchemy
+pymysql
+python-dotenv
+jinja2
+python-multipart
+alembic
