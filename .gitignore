@@ -43,4 +43,9 @@ jdk17.rpm
 certbot/conf/archive/
 certbot/conf/live/
 
+study.pem__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 study.pem
