@@ -6,6 +6,7 @@ from service import analyze_sentiment, recommendation_map, save_diary, get_all_d
 from schemas import DiaryCreate, DiaryRead
 from database import SessionLocal
 from models import Diary
+from datetime import date
 import os
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '../templates'))

@@ -13,19 +13,22 @@ import json
 from models import Diary
 from database import SessionLocal
 from sqlalchemy.orm import Session
+from datetime import date
 
-def analyze_sentiment(text: str) -> str:
-    if any(word in text for word in positive_words):
+def analyze_sentiment(content: str) -> str:
+    if any(word in content for word in positive_words):
         return "positive"
-    if any(word in text for word in negative_words):
+    if any(word in content for word in negative_words):
         return "negative"
     return "neutral"
 
-def save_diary(db: Session, text: str, sentiment: str, recommended_projects: list = None):
+def save_diary(db: Session, summary: str, content: str, sentiment: str, recommended_projects: list = None):
     import json
     diary = Diary(
-        text=text,
+        summary=summary,
+        content=content, 
         sentiment=sentiment,
+        date=date.today(),
         recommended_projects=json.dumps(recommended_projects or [])
     )
     db.add(diary)
@@ -34,7 +37,7 @@ def save_diary(db: Session, text: str, sentiment: str, recommended_projects: lis
     return diary
 
 def get_all_diaries(db: Session):
-    diaries = db.query(Diary).order_by(Diary.created_at.desc()).all()
+    diaries = db.query(Diary).order_by(Diary.date.desc()).all()
     import json
     for diary in diaries:
         diary.recommended_projects = json.loads(diary.recommended_projects or '[]')

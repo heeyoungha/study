@@ -6,6 +6,8 @@ class Diary(Base):
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date)
     content = Column(Text)
+    summary = Column(String(255))  
+    sentiment = Column(String(16)) 
     recommended_projects = Column(Text)  # JSON 문자열로 저장
 
 class BookClubEntry(Base):
