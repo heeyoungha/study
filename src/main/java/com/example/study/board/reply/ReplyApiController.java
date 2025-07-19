@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/api/board/{boardId}/reply")
 @RequiredArgsConstructor
-public class ReplyController {
+public class ReplyApiController {
 
     private final ReplyService replyService;
 

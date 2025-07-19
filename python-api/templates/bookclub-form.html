@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>독서모임 - 입력</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        textarea { height: 100px; resize: vertical; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .nav { margin-bottom: 30px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">홈</a>
+        <a href="/diary">일기</a>
+        <a href="/bookclub/list">독서모임</a>
+    </div>
+    
+    <h1>독서모임 - 독후감 작성</h1>
+    
+    <form method="post" action="/bookclub/form">
+        <div class="form-group">
+            <label for="book_title">책 제목:</label>
+            <input type="text" id="book_title" name="book_title" required>
+        </div>
+        <div class="form-group">
+            <label for="summary">한줄소감:</label>
+            <input type="text" id="summary" name="summary" required placeholder="책에 대한 한줄 소감을 입력하세요...">
+        </div>
+        <div class="form-group">
+            <label for="review">소감문 (3-4줄):</label>
+            <textarea id="review" name="review" required placeholder="오늘 읽은 책에 대한 소감을 3-4줄로 작성해주세요..."></textarea>
+        </div>
+        <button type="submit">저장</button>
+    </form>
+</body>
+</html> 

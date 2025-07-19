@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>독서모임 - 목록</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .entry { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #007bff; }
+        .entry h3 { color: #0056b3; margin-top: 0; }
+        .recommendations { background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .recommendations h4 { color: #0056b3; margin-top: 0; margin-bottom: 10px; }
+        .recommendations ul { margin: 10px 0; }
+        .recommendations li { margin: 5px 0; }
+        .nav { margin-bottom: 30px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .actions { margin-top: 20px; }
+        .actions a { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .actions a:hover { background-color: #0056b3; }
+        .empty { text-align: center; color: #666; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">홈</a>
+        <a href="/diary">일기</a>
+        <a href="/bookclub/list">독서모임</a>
+    </div>
+    <div class="actions" style="margin-bottom: 20px;">
+        <a href="/bookclub" style="display:inline-block; padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:4px;">독후감 작성</a>
+    </div>
+    <h1>📚 독서모임 기록</h1>
+    {% if entries %}
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f8f9fa;">
+                    <th style="padding:10px; border:1px solid #ddd;">책 제목</th>
+                    <th style="padding:10px; border:1px solid #ddd;">작성일</th>
+                    <th style="padding:10px; border:1px solid #ddd;">연관 프로젝트</th>
+                    <th style="padding:10px; border:1px solid #ddd;">한줄소감</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td style="padding:10px; border:1px solid #ddd;"><a href="/bookclub/{{ entry.id }}" style="color:#0056b3; text-decoration:underline;">{{ entry.book_title }}</a></td>
+                    <td style="padding:10px; border:1px solid #ddd;">{{ entry.date }}</td>
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        {% if entry.recommended_projects %}
+                            <ul style="margin:0; padding-left:18px;">
+                                {% for project in entry.recommended_projects %}
+                                    <li>{{ project }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
+                    <td style="padding:10px; border:1px solid #ddd;">{{ entry.summary }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <h3>아직 독서모임 기록이 없습니다.</h3>
+            <p>첫 번째 독후감을 작성해보세요!</p>
+        </div>
+    {% endif %}
+    <div class="actions">
+        <a href="/bookclub">새로운 독후감 작성</a>
+    </div>
+</body>
+</html> 
