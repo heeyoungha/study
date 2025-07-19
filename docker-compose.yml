@@ -65,8 +65,14 @@ services:
       - ./python-api/static:/var/www/html/
     depends_on:
       - app
+      - python-api
     networks:
       - study-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]  # 또는 curl -f http://localhost
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   python-api:
     build:

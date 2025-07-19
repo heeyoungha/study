@@ -19,11 +19,7 @@
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="/">홈</a>
-        <a href="/diary">일기</a>
-        <a href="/bookclub/list">독서모임</a>
-    </div>
+    {% include 'fragment/nav.html' %}
     <div class="actions" style="margin-bottom: 20px;">
         <a href="/bookclub" style="display:inline-block; padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:4px;">독후감 작성</a>
     </div>
@@ -63,8 +59,5 @@
             <p>첫 번째 독후감을 작성해보세요!</p>
         </div>
     {% endif %}
-    <div class="actions">
-        <a href="/bookclub">새로운 독후감 작성</a>
-    </div>
 </body>
 </html> 

@@ -1,14 +1,46 @@
-<h2>내 일기</h2>
-<p>{{ text }}</p>
-
-<h3>감정 분석 결과: <span>{{ sentiment }}</span></h3>
-
-<h3>추천 프로젝트</h3>
-<ul>
-  {% for rec in recommendations %}
-    <li>{{ rec }}</li>
-  {% endfor %}
-</ul>
-
-<a href="/diary">다시 작성하기</a>
-<p>{% if error %}{{ error }}{% endif %}</p> 
+{% include 'fragment/nav.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>일기 상세</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .result { background-color: #f8f9fa; padding: 24px; border-radius: 10px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .recommendations { background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .recommendations h3 { color: #0056b3; margin-top: 0; }
+        .recommendations ul { margin: 10px 0; }
+        .recommendations li { margin: 5px 0; }
+        .actions { margin-top: 20px; }
+        .actions a { display: inline-block; margin-right: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .actions a:hover { background-color: #0056b3; }
+        h1 { text-align: center; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>일기 상세</h1>
+    {% if error %}
+        <div style="color:red;">{{ error }}</div>
+    {% else %}
+        <div class="result">
+            <h2>📓 {{ diary.summary }}</h2>
+            <p><strong>날짜:</strong> {{ diary.date }}</p>
+            <p><strong>본문:</strong></p>
+            <p>{{ diary.content }}</p>
+            {% if diary.recommended_projects %}
+                <div class="recommendations">
+                    <h3>💡 추천 프로젝트/액션</h3>
+                    <ul>
+                        {% for project in diary.recommended_projects %}
+                            <li>{{ project }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    <div class="actions">
+        <a href="/diary">새 일기 작성</a>
+        <a href="/diary/list">목록 보기</a>
+    </div>
+</body>
+</html> 
