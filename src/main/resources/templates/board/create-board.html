@@ -68,7 +68,7 @@
       content: document.getElementById('content').value
     };
 
-    fetch('/v1/board', {
+    fetch('/board', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -77,7 +77,7 @@
     })
             .then(response => response.json())
             .then(data => {
-              window.location.href = '/v1/boardList';
+              window.location.href = '/boardList';
             })
             .catch((error) => {
               console.error('Error:', error);

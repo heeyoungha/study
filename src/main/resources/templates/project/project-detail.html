@@ -20,9 +20,9 @@
       <div class="form-control" id="startDate" th:text="${project.startDate}"></div>
     </div>
     <div class="button-group">
-      <!-- <button class="btn btn-primary" onclick="window.location.href='/v1/project?id=' + [[${project.id}]]">수정</button>
+      <!-- <button class="btn btn-primary" onclick="window.location.href='/project?id=' + [[${project.id}]]">수정</button>
       <button class="btn btn-danger" onclick="deleteProject([[${project.id}]])">삭제</button> -->
-      <button class="btn btn-secondary" onclick="window.location.href='/v1/project'">목록</button>
+      <button class="btn btn-secondary" onclick="window.location.href='/project'">목록</button>
     </div>
   </div>
 </div>
@@ -30,13 +30,13 @@
 <script>
   function deleteProject(projectId) {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    fetch(`/v1/api/project/${projectId}`, {
+    fetch(`/api/project/${projectId}`, {
       method: 'DELETE'
     })
     .then(response => {
       if (!response.ok) throw new Error('삭제 실패');
       alert('삭제되었습니다.');
-      window.location.href = '/v1/project';
+      window.location.href = '/project';
     })
     .catch(error => {
       alert('삭제 중 오류 발생');

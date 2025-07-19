@@ -36,7 +36,7 @@
       </div>
       <div class="button-group">
         <button type="submit" class="btn btn-primary" id="submitButton">프로젝트 생성</button>
-        <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;" onclick="window.location.href='/v1/project'">취소</button>
+        <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;" onclick="window.location.href='/project'">취소</button>
       </div>
     </form>
   </div>
@@ -67,7 +67,7 @@
     document.getElementById('cancelButton').style.display = 'inline-block';
 
     // 프로젝트 데이터 가져오기
-    fetch(`/v1/api/project/${projectId}`)
+    fetch(`/api/project/${projectId}`)
             .then(response => response.json())
             .then(data => {
               document.getElementById('title').value = data.title;
@@ -88,7 +88,7 @@
       startDate: document.getElementById('startDate').value,
     };
 
-    const url = projectId ? `/v1/api/project/${projectId}` : '/v1/api/project';
+    const url = projectId ? `/api/project/${projectId}` : '/api/project';
     const method = projectId ? 'PUT' : 'POST';
 
     fetch(url, {
@@ -101,7 +101,7 @@
       .then(response => {
         if (!response.ok) throw new Error('서버 오류가 발생했습니다.');
         alert(projectId ? '프로젝트가 성공적으로 수정되었습니다.' : '프로젝트가 성공적으로 생성되었습니다.');
-        window.location.href = '/v1/project';
+        window.location.href = '/project';
       })
       .catch(error => {
         console.error('Error:', error);

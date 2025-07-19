@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Controller
-@RequestMapping("/v1")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class CafeRecommendationController {
 

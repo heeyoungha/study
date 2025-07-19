@@ -17,7 +17,7 @@
 
     <h2>게시판</h2>
 
-    <a href="/v1/board" class="btn btn-primary">글쓰기</a>
+    <a href="/board" class="btn btn-primary">글쓰기</a>
 
     <table class="table table-hover"> <!-- Bootstrap 클래스 추가 -->
         <thead>
@@ -35,7 +35,7 @@
                 <span th:text="${board.id}"></span>
             </td>
             <td>
-                <a th:href="@{'/v1/board/'+ ${board.id}}">
+                <a th:href="@{'/board/'+ ${board.id}}">
                     <span th:text="${board.title}"></span>
                 </a>
             </td>
@@ -47,7 +47,7 @@
     </table>
 
     <!-- 검색기능 -->
-    <form th:action="@{/v1/boardList}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
+    <form th:action="@{/boardList}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
         <input type="text" name="searchKeyword" class="form-control" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary">검색</button>

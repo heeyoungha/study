@@ -111,7 +111,7 @@
 
 <!-- 수정 or 삭제 -->
 <div class="button-group">
-    <a th:href="@{'/v1/board/edit/' + ${boardDto.id}}">
+    <a th:href="@{'/board/edit/' + ${boardDto.id}}">
         <button>수정</button>
     </a>
     <button th:onclick="'deleteBoard(' + ${boardDto.id} + ')'">삭제</button>
@@ -168,7 +168,7 @@
 
 <!-- Reply Section -->
 <div class="input-group">
-    <form id="reply" th:action="@{/v1/board/{boardId}/reply (boardId=${boardDto.id})}" method="post">
+    <form id="reply" th:action="@{/board/{boardId}/reply (boardId=${boardDto.id})}" method="post">
         <input type="text" id="content" name="content" class="form-control" placeholder="댓글을 입력해주세요.." aria-label="댓글을 입력해주세요.." aria-describedby="basic-addon2" />
         <input type="hidden" id="boardId" name="boardId" th:value="${boardDto.id}" />
         <button class="btn btn-outline-secondary" type="submit">등록</button>
@@ -179,13 +179,13 @@
     //게시글 삭제
     function deleteBoard(id) {
         if(confirm('정말로 삭제하시겠습니까?')) {
-            fetch(`/v1/board/${id}`, {
+            fetch(`/board/${id}`, {
                 method: 'DELETE',
             })
                 .then(response => {
                     if(response.ok) {
                         alert('삭제되었습니다.');
-                        window.location.href = '/v1/boardList'; // 홈페이지로 리다이렉트
+                        window.location.href = '/boardList'; // 홈페이지로 리다이렉트
                     } else {
                         alert('삭제에 실패했습니다.');
                     }
@@ -293,7 +293,7 @@
                     data: {replyid: Number(replyid)},
                     dataType: 'html',
                     success: function (res) {
-                        location.href = "/v1/board/" + boardid;
+                        location.href = "/board/" + boardid;
                         console.log('삭제 성공')
                         console.log(res);
                     },
@@ -310,7 +310,7 @@
 </script>
 <!-- Reply Section End -->
 <p class="lead">
-    <a href="/v1/boardList" role="button">목록으로</a>
+    <a href="/boardList" role="button">목록으로</a>
 </p>
 
 </body>

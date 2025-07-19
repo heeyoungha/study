@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/v1/board/{boardId}/reply")
+@RequestMapping("/board/{boardId}/reply")
 @RequiredArgsConstructor
 public class ReplyWebController {
     private final ReplyService replyService;
@@ -35,7 +35,7 @@ public class ReplyWebController {
     @PostMapping
     public String createReply(@PathVariable Long boardId, @ModelAttribute ReplyDto replyDto, @SessionAttribute(name = "user", required = false) User user) {
         replyService.cerateReply(replyDto, user, boardId);
-        return "redirect:/v1/board/" + boardId;
+        return "redirect:/board/" + boardId;
     }
 
     // 댓글 수정 폼
@@ -54,7 +54,7 @@ public class ReplyWebController {
     public String editReply(@PathVariable Long boardId, @PathVariable Long replyId, @ModelAttribute ReplyDto replyDto) {
 
         replyService.updateReply(replyId, replyDto);
-        return "redirect:/v1/board/" + boardId;
+        return "redirect:/board/" + boardId;
     }
 
     // 댓글 삭제 처리

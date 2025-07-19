@@ -60,7 +60,7 @@
             content: formData.get('content')
         };
 
-        fetch(`/v1/board/edit/${boardDto.id}`, {
+        fetch(`/board/edit/${boardDto.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,7 +69,7 @@
         })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = '/v1/boardList'; // 성공 시 리다이렉트
+                    window.location.href = '/boardList'; // 성공 시 리다이렉트
                 } else {
                     alert('업데이트 실패');
                 }

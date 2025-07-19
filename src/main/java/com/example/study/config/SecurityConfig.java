@@ -59,9 +59,9 @@ public class SecurityConfig {
                                     HttpSession session = request.getSession();
                                     session.setAttribute("user", oAuth2User.getAttributes());
 
-                                    log.info("Redirecting to /v1 after successful login");
+                                    log.info("Redirecting to / after successful login");
                                     // 로그인 후 리다이렉트
-                                    response.sendRedirect("/v1");
+                                    response.sendRedirect("/");
                                 } catch (IOException e) {
                                     log.error("Error during OAuth2 login success handling", e);
                                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

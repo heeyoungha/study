@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/api/board/{boardId}/reply")
+@RequestMapping("/api/board/{boardId}/reply")
 @RequiredArgsConstructor
 public class ReplyApiController {
 

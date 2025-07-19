@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Controller
 public class indexController {
 
-    @GetMapping("/v1")
-    public String helloworld(HttpSession session, Model model){
+    @GetMapping("/")
+    public String index(HttpSession session, Model model){
         String username = (String) session.getAttribute("username");
 
         if(username == null) {

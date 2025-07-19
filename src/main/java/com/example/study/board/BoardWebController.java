@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @Controller
-@RequestMapping("/v1")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class BoardWebController {
     private final BoardService boardService;
