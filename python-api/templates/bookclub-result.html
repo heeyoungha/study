@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>독서모임 - 결과</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .result { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .recommendations { background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .recommendations h3 { color: #0056b3; margin-top: 0; }
+        .recommendations ul { margin: 10px 0; }
+        .recommendations li { margin: 5px 0; }
+        .nav { margin-bottom: 30px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .actions { margin-top: 20px; }
+        .actions a { display: inline-block; margin-right: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .actions a:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">홈</a>
+        <a href="/diary">일기</a>
+        <a href="/bookclub/list">독서모임</a>
+    </div>
+    <h1>독서모임 상세</h1>
+    {% if error %}
+        <div style="color:red;">{{ error }}</div>
+    {% else %}
+        <div class="result">
+            <h2>📚 {{ entry.book_title }}</h2>
+            <p><strong>작성일:</strong> {{ entry.date }}</p>
+            <p><strong>한줄소감:</strong> {{ entry.summary }}</p>
+            <p><strong>소감문:</strong></p>
+            <p>{{ entry.review }}</p>
+            {% if entry.recommended_projects %}
+                <div class="recommendations">
+                    <h3>💡 추천 프로젝트/액션</h3>
+                    <ul>
+                        {% for project in entry.recommended_projects %}
+                            <li>{{ project }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="actions">
+        <a href="/bookclub">새로운 독후감 작성</a>
+        <a href="/bookclub/list">목록 보기</a>
+    </div>
+</body>
+</html> 

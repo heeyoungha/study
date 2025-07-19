@@ -77,6 +77,16 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    environment:
+      - DATASOURCE_HOST=mysql
+      - DATASOURCE_PORT=3306
+      - DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - DATASOURCE_DB=study
+    env_file:
+      - .env
+    depends_on:
+      - mysql
     networks:
       - study-network
 

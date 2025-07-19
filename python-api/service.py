@@ -38,4 +38,20 @@ def get_all_diaries(db: Session):
     import json
     for diary in diaries:
         diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
-    return diaries 
+    return diaries
+
+def recommend_projects_from_diary(content: str) -> list:
+    if "감동" in content or "영감" in content:
+        return ["감상문 공유 프로젝트", "책 속 명언 모음"]
+    elif "어려움" in content or "이해 안됨" in content:
+        return ["스터디 그룹 결성", "작가 인터뷰 찾아보기"]
+    else:
+        return ["서평 블로그 작성", "독서 토론회 개최"]
+
+def recommend_projects_from_review(review: str) -> list:
+    if "감동" in review or "영감" in review:
+        return ["감상문 공유 프로젝트", "책 속 명언 모음"]
+    elif "어려움" in review or "이해 안됨" in review:
+        return ["스터디 그룹 결성", "작가 인터뷰 찾아보기"]
+    else:
+        return ["서평 블로그 작성", "독서 토론회 개최"] 
