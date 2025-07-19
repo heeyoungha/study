@@ -30,7 +30,7 @@ public class ProjectService {
     public ProjectResponse saveProject(ProjectRequest.CreateProjectRequest request) {
 
 
-        Project project = Project.of(request.getTitle(), request.getStartDate());
+        Project project = Project.of(request.getTitle(), request.getStartDate(), request.getPlace(), request.getStatus());
         projectRepository.save(project);
         return new ProjectResponse(project);
     }

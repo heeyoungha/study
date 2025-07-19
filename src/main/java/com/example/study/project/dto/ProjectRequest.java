@@ -9,6 +9,8 @@ public class ProjectRequest {
 
         private String title;
         private String startDate;
+        private String status;
+        private String place;
         private Long userId;
 
     }
@@ -17,5 +19,7 @@ public class ProjectRequest {
     public static class UpdateProjectRequest{
         private String title;
         private String startDate;
+        private String status;
+        private String place;
     }
 }

@@ -12,8 +12,6 @@
   <div th:replace="~{fragment/nav :: navigation}"></div>
 
   <h1>Project Management</h1>
-  <ul id="project-list" class="project-list">
-  </ul>
 
   <form>
     <button id="create-project-form" type="submit">Create Project</button>
@@ -22,27 +20,14 @@
   <table class="table table-hover"> <!-- Bootstrap 클래스 추가 -->
     <thead>
     <tr>
-      <th>번호</th>
-      <th>프로젝트</th>
       <th>시작일자</th>
+      <th>프로젝트</th>
+      <th>장소</th>
+      <th>상태</th>
     </tr>
     </thead>
-
-    <tbody>
-    <!-- CONTENTS -->
-    <tr th:each="project, index : ${projectList}">
-      <td>
-        <span th:text="${project.id}"></span>
-      </td>
-      <td>
-        <a th:href="@{'/project/'+ ${project.id}}">
-          <span th:text="${project.title}"></span>
-        </a>
-      </td>
-      <td>
-        <span th:text="${project.startDate}"></span>
-      </td>
-    </tr>
+    <tbody id="project-list">
+      <!-- JS로 동적으로 행을 추가 -->
     </tbody>
   </table>
 
@@ -84,6 +69,17 @@
   </div>
 </div>
 
+<!-- Show Project Detail -->
+<div id="projectModal" class="modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000;">
+  <div class="modal-content" style="background:#fff; margin:10vh auto; padding:24px; border-radius:8px; max-width:400px; position:relative;">
+    <span class="close" style="position:absolute; right:16px; top:8px; cursor:pointer; font-size:24px;">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p><strong>시작일자:</strong> <span id="modalStartDate"></span></p>
+    <p><strong>장소:</strong> <span id="modalPlace"></span></p>
+    <p><strong>상태:</strong> <span id="modalStatus"></span></p>
+  </div>
+</div>
+
 <!-- Edit Modal -->
 <div id="editModal" class="modal">
   <div class="modal-content">
@@ -104,35 +100,89 @@
     let currentProjectId = null;
 
 
-    // 프로젝트 항목 그리기
-    function addProjectToList(project) {
-      const li = document.createElement('li');
-      li.className = 'project-item';
-      li.innerHTML = `
-                    <span class="project-name" data-id="${project.id}">${project.title}</span>
-                    <div class="project-actions">
-                        <button class="btn-edit" onclick="editProject(${project.id})">Edit</button>
-                        <button class="btn-delete" onclick="deleteProject(${project.id})">Delete</button>
-                    </div>
-                `;
-      projectList.appendChild(li);
+    // 프로젝트 상세 정보 조회
+    async function showProjectDetails(projectId) {
+      try {
+        const response = await fetch(`/api/project/${projectId}`);
+        if (!response.ok) throw new Error('프로젝트 정보를 불러올 수 없습니다');
 
-      // 프로젝트 이름 클릭 시 상세 정보 조회
-      li.querySelector('.project-name').addEventListener('click', () => {
-        fetch(`/api/project/${project.id}`)
-                .then(response => {
-                  if (!response.ok) throw new Error('Failed to fetch project details');
-                  return response.json();
-                })
-                .then(projectDetails => {
-                  alert(`Project Details:\nName: ${projectDetails.name}\nID: ${projectDetails.id}`);
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                  alert('Failed to load project details');
-                });
-      });
+        const project = await response.json();
+        showModal(project);
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+      }
     }
+
+    // 모달 표시
+    function showModal(project) {
+      document.getElementById('modalTitle').textContent = project.title;
+      document.getElementById('modalStartDate').textContent = project.startDate;
+      document.getElementById('modalPlace').textContent = project.place;
+      document.getElementById('modalStatus').textContent = project.status;
+      document.getElementById('projectModal').style.display = 'block';
+    }
+
+    // 모달 닫기
+    function closeModal() {
+      document.getElementsByClassName('closeBtn').style.display = 'none';
+    }
+
+    // 상태 옵션 생성
+    function createStatusOptions(currentStatus) {
+      const statusMap = {
+        'IN_PROGRESS': '진행중',
+        'DONE': '완료',
+        'ON_HOLD': '보류',
+        'TO_DO': '시작전'
+      };
+
+      let options = '';
+      for (const [value, label] of Object.entries(statusMap)) {
+        const selected = currentStatus === value ? 'selected' : '';
+        options += `<option value="${value}" ${selected}>${label}</option>`;
+      }
+      return options;
+    }
+
+    // 프로젝트 항목 추가
+    function addProjectToList(project) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+    <td>${project.startDate || '-'}</td>
+    <td>
+      <a href="#" class="project-name" data-id="${project.id}"
+         style="color:#0056b3; text-decoration:underline;">
+        ${project.title}
+      </a>
+    </td>
+    <td>${project.place || '-'}</td>
+    <td>
+      <select class="project-status" data-id="${project.id}">
+        ${createStatusOptions(project.status)}
+      </select>
+    </td>
+  `;
+
+      // 프로젝트 이름 클릭 이벤트
+      tr.querySelector('.project-name').addEventListener('click', function(e) {
+        e.preventDefault();
+        showProjectDetails(project.id);
+      });
+
+      // 상태 변경 이벤트 (필요시 API 호출 추가)
+      tr.querySelector('.project-status').addEventListener('change', function(e) {
+        console.log(`프로젝트 ${project.id} 상태 변경: ${e.target.value}`);
+        // TODO: 상태 변경 API 호출
+      });
+
+      document.getElementById('project-list').appendChild(tr);
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
 
     // 생성 버튼 클릭
     document.getElementById('create-project-form').addEventListener('click', function(e) {
@@ -196,6 +246,25 @@
       }
     };
 
+    //프로젝트 리스트 조회
+    function loadProjects() {
+      fetch('/api/project')
+              .then(response => response.json())
+              .then(data => {
+                const projects = data.content;
+                console.log(projects);
+                if (!Array.isArray(projects)) {
+                  throw new Error('프로젝트 목록이 배열이 아닙니다.');
+                }
+                const projectList = document.getElementById('project-list');
+                projectList.innerHTML = '';
+                projects.forEach(addProjectToList);
+              })
+              .catch(error => {
+                console.error('Error loading projects:', error);
+                alert('프로젝트 목록을 불러오지 못했습니다.');
+              });
+    }
     // 초기 프로젝트 목록 로드
     loadProjects();
   });

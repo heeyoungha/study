@@ -11,11 +11,15 @@ public class ProjectResponse {
     private String title;
     private String startDate;
     private String userName;
+    private String status;
+    private String place;
 
     public ProjectResponse(Project project){
 
         this.id = project.getId();
         this.title = project.getTitle();
         this.startDate = project.getStartDate();
+        this.status = project.getStatus();
+        this.place = project.getPlace();
     }
 }

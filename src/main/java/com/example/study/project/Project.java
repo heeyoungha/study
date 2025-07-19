@@ -9,7 +9,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Getter
 @Table(name = "project")
-@SQLRestriction("status <> 'DELETED'")
+@SQLRestriction("is_deleted = false")
 public class Project extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,17 +19,19 @@ public class Project extends BaseEntity {
 
     private String startDate;
 
+    private String place;
     private String status;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_user_id")
     private ProjectUser projectUser;
 
-    public static Project of(String title, String startDate){
+    public static Project of(String title, String startDate, String place, String status){
         Project project = new Project();
         project.title = title;
         project.startDate = startDate;
-        project.status = "ACTIVE";
+        project.place = place;
+        project.status = status;
         return project;
     }
 
