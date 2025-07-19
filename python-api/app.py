@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from routes import diary
+from routes import diary, bookclub
 
 
 app = FastAPI(title="Diary Sentiment & Project Recommendation API",
@@ -11,6 +11,7 @@ app = FastAPI(title="Diary Sentiment & Project Recommendation API",
 templates = Jinja2Templates(directory="templates")
 
 app.include_router(diary.router)
+app.include_router(bookclub.router)
 
 @app.get("/")
 def read_root():

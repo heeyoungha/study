@@ -41,8 +41,8 @@ target_metadata = Base.metadata
 
 
 def include_object(object, name, type_, reflected, compare_to):
-    # diary와 alembic_version만 alembic 관리, 나머지는 무시
-    if type_ == "table" and name not in ("diary", "alembic_version"):
+    # diary, bookclub_entry와 alembic_version만 alembic 관리, 나머지는 무시
+    if type_ == "table" and name not in ("diary", "bookclub_entry", "alembic_version"):
         return False
     return True
 

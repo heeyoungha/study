@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 
 # .env 파일 로드 (DB 환경변수)
@@ -17,3 +18,13 @@ DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB
 # SQLAlchemy 엔진 및 세션 생성
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Base 클래스 정의
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
