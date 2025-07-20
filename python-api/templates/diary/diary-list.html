@@ -3,50 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>일기 목록</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .nav { margin-bottom: 30px; }
-        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
-        .actions { margin-top: 20px; }
-        .actions a { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-        .actions a:hover { background-color: #0056b3; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/common.css') }}">
 </head>
 <body>
     {% include 'fragment/nav.html' %}
-    <div class="actions" style="margin-bottom: 20px;">
-        <a href="/diary" style="display:inline-block; padding:10px 20px; background-color:#007bff; color:white; text-decoration:none; border-radius:4px;">새 일기 작성</a>
+    <div class="container">
+        <div class="actions">
+            <a href="/diary">새 일기 작성</a>
+        </div>
+        <h1>📝 일기 목록</h1>
+        {% if diaries %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>한줄일기(제목)</th>
+                        <th>연관 프로젝트</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for diary in diaries %}
+                    <tr>
+                        <td>{{ diary.date }}</td>
+                        <td><a href="/diary/{{ diary.id }}">{{ diary.summary }}</a></td>
+                        <td>
+                            {% if diary.recommended_projects %}
+                                <ul>
+                                {% for project in diary.recommended_projects %}
+                                    <li>{{ project }}</li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty">
+                <h3>아직 일기 기록이 없습니다.</h3>
+                <p>첫 번째 일기를 작성해보세요!</p>
+            </div>
+        {% endif %}
     </div>
-    <h2>일기 목록</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>날짜</th>
-                <th>한줄일기(제목)</th>
-                <th>연관 프로젝트</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for diary in diaries %}
-            <tr>
-                <td>{{ diary.date }}</td>
-                <td><a href="/diary/{{ diary.id }}" style="color:#0056b3; text-decoration:underline;">{{ diary.summary }}</a></td>
-                <td>
-                    {% if diary.recommended_projects %}
-                        <ul style="margin:0; padding-left:18px;">
-                        {% for project in diary.recommended_projects %}
-                            <li>{{ project }}</li>
-                        {% endfor %}
-                        </ul>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
 </body>
 </html> 
