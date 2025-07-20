@@ -4,50 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>프로젝트 생성</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/common.css}">
 </head>
 <body>
-<div class="contents">
   <div class="container">
-    <h1 id="formTitle">새 프로젝트 생성</h1>
+    <h1 id="formTitle">🏄🏻 새 프로젝트 생성</h1>
+    
     <form id="projectForm">
       <input type="hidden" id="projectId" name="projectId">
-      <div class="mb-4">
-        <label for="title" class="form-label">프로젝트 제목</label>
+      
+      <div class="form-group">
+        <label for="title">프로젝트 제목</label>
         <input
                 type="text"
-                class="form-control"
                 id="title"
                 name="title"
                 required
                 placeholder="프로젝트 제목을 입력하세요"
         >
       </div>
-      <div class="mb-4">
-        <label for="startDate" class="form-label">시작 날짜</label>
+      
+      <div class="form-group">
+        <label for="startDate">시작 날짜</label>
         <input
                 type="date"
-                class="form-control"
                 id="startDate"
                 name="startDate"
                 required
         >
       </div>
-      <div class="mb-4">
-        <label for="place" class="form-label">장소</label>
+      
+      <div class="form-group">
+        <label for="place">장소</label>
         <input
                 type="text"
-                class="form-control"
                 id="place"
                 name="place"
                 required
+                placeholder="프로젝트 장소를 입력하세요"
         >
       </div>
-      <div class="mb-4">
-        <label for="status" class="form-label">상태</label>
+      
+      <div class="form-group">
+        <label for="status">상태</label>
         <select
-                class="form-control"
                 id="status"
                 name="status"
                 required
@@ -59,15 +59,18 @@
           <option value="TO_DO">시작전</option>
         </select>
       </div>
-      <div class="button-group">
-        <button type="submit" class="btn btn-primary" id="submitButton">프로젝트 생성</button>
-        <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;" onclick="window.location.href='/project'">취소</button>
-      </div>
+      
+      <button type="submit" id="submitButton">프로젝트 생성</button>
+      <button type="button" id="cancelButton" style="display: none; margin-top: 10px;" onclick="window.location.href='/project'">취소</button>
     </form>
+    
+    <div class="nav-links">
+      <a href="/project">📋 프로젝트 목록</a>
+      <a href="/diary">📝 일기 작성</a>
+      <a href="/bookclub">📚 독서모임</a>
+    </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
   var projectId = null;
   // 페이지 로드 시 수정 모드 체크
@@ -87,7 +90,7 @@
 
   // 프로젝트 수정 모드 설정
   function setEditMode(projectId) {
-    document.getElementById('formTitle').textContent = '프로젝트 수정';
+    document.getElementById('formTitle').textContent = '🏄🏻 프로젝트 수정';
     document.getElementById('submitButton').textContent = '프로젝트 수정';
     document.getElementById('cancelButton').style.display = 'inline-block';
 

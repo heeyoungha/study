@@ -1,63 +1,40 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
-  <title>create-board</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 20px;
-    }
-    form {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #f8f8f8;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    input[type="text"],
-    textarea {
-      width: 95%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 150px;
-    }
-    input[type="submit"] {
-      background-color: #4CAF50;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-  </style>
+  <title>게시글 작성</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
 </head>
 <body>
-<form id="boardForm">
-  <label for="title">제목:</label>
-  <input type="text" name="title" id="title"> <br>
-  <label for="writer">작성자:</label>
-  <input type="text" name="writer" id="writer"> <br>
-  <label for="content">내용:</label>
-  <textarea name="content" id="content"></textarea><br>
+  <div class="container">
+    <h1>📝 게시글 작성</h1>
+    
+    <form id="boardForm">
+      <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" name="title" id="title" required placeholder="게시글 제목을 입력하세요">
+      </div>
+      
+      <div class="form-group">
+        <label for="writer">작성자</label>
+        <input type="text" name="writer" id="writer" required placeholder="작성자를 입력하세요">
+      </div>
+      
+      <div class="form-group">
+        <label for="content">내용</label>
+        <textarea name="content" id="content" required placeholder="게시글 내용을 입력하세요"></textarea>
+      </div>
 
-  <input type="submit" value="등록">
-</form>
+      <button type="submit">등록</button>
+    </form>
+    
+    <div class="nav-links">
+      <a href="/boardList">📋 게시글 목록</a>
+      <a href="/project">🏄🏻 프로젝트</a>
+      <a href="/diary">📝 일기</a>
+    </div>
+  </div>
+
 <script>
   document.getElementById('boardForm').addEventListener('submit', function(e) {
     e.preventDefault();

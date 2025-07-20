@@ -1,25 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>게시판</title>
-
-    <link rel="stylesheet" th:href="@{/css/nav.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> <!-- Bootstrap CSS 추가 -->
-
 </head>
 <body>
-<div class="container">
+  <div class="container">
     <!-- 공통 네비게이션 불러오기 -->
     <div th:replace="~{fragment/nav :: navigation}"></div>
 
-    <h2>게시판</h2>
+    <h1>📋 게시판</h1>
 
-    <a href="/board" class="btn btn-primary">글쓰기</a>
+    <div class="actions">
+      <a href="/board">글쓰기</a>
+    </div>
 
-    <table class="table table-hover"> <!-- Bootstrap 클래스 추가 -->
+    <table>
         <thead>
         <tr>
             <th>번호</th>
@@ -47,11 +45,9 @@
     </table>
 
     <!-- 검색기능 -->
-    <form th:action="@{/boardList}" method="get" class="input-group mb-3"> <!-- Bootstrap 클래스 추가 -->
-        <input type="text" name="searchKeyword" class="form-control" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
-        <div class="input-group-append">
-            <button type="submit" class="btn btn-primary">검색</button>
-        </div>
+    <form th:action="@{/boardList}" method="get" class="input-group">
+        <input type="text" name="searchKeyword" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
+        <button type="submit">검색</button>
     </form>
 
     <!-- 페이징 -->
@@ -82,13 +78,6 @@
             </li>
         </ul>
     </div>
-</div>
-
-<!-- jQuery CDN -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap JS CDN -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-
+  </div>
 </body>
 </html>
