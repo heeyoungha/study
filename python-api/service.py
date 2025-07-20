@@ -16,13 +16,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import date
 import asyncio
+from gpt_service import analyze_sentiment_async, recommend_projects_async, analyze_sentiment_with_gpt, recommend_projects_with_gpt
 
+# 기존 동기 감정 분석 (fallback용)
 def analyze_sentiment(content: str) -> str:
     if any(word in content for word in positive_words):
         return "positive"
     if any(word in content for word in negative_words):
         return "negative"
     return "neutral"
+
+# 새로운 비동기 감정 분석 (GPT 사용)
+async def analyze_sentiment_enhanced(content: str) -> dict:
+    """
+    GPT를 사용한 향상된 감정 분석
+    """
+    return await analyze_sentiment_with_gpt(content)
 
 async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None):
     import json
@@ -45,6 +54,13 @@ async def get_all_diaries_async(db: AsyncSession):
     for diary in diaries:
         diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
     return diaries
+
+# 새로운 비동기 프로젝트 추천 (GPT 사용)
+async def recommend_projects_enhanced(content: str, sentiment: str) -> dict:
+    """
+    GPT를 사용한 향상된 프로젝트 추천
+    """
+    return await recommend_projects_with_gpt(content, sentiment)
 
 def recommend_projects_from_diary(content: str) -> list:
     if "감동" in content or "영감" in content:

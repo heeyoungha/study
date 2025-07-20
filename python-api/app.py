@@ -18,10 +18,10 @@ app.include_router(bookclub.router)
 async def read_root():
     return RedirectResponse(url="/docs")
 
-@app.get("/swagger")
+@app.get("/python/swagger")
 async def swagger_redirect():
     return RedirectResponse(url="/docs")
 
-@app.get("/api-docs")
+@app.get("/python/api-docs")
 async def api_docs_redirect():
-    return RedirectResponse(url="/docs") 
+    return RedirectResponse(url="/docs")

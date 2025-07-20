@@ -89,6 +89,7 @@ services:
       - DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - DATASOURCE_DB=study
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
       - .env
     depends_on:

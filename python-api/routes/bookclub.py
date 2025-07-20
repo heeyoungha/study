@@ -7,7 +7,8 @@ from typing import List
 from database import get_async_db
 from models import BookClubEntry
 from schemas import BookClubEntryCreate, BookClubEntryResponse
-from service import recommend_projects_from_review
+from service import recommend_projects_enhanced
+from gpt_service import recommend_projects_with_gpt
 import json
 import os
 from datetime import date
@@ -17,7 +18,10 @@ router = APIRouter()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '../templates'))
 
 async def save_bookclub_entry_async(db: AsyncSession, book_title: str, review: str, summary: str, entry_date: date):
-    recommended_projects = recommend_projects_from_review(review)
+    # GPT를 사용한 향상된 프로젝트 추천
+    recommendation_result = await recommend_projects_with_gpt(review, "neutral")  # 독후감은 중립적으로 처리
+    recommended_projects = recommendation_result["projects"]
+    
     db_entry = BookClubEntry(
         date=entry_date,
         book_title=book_title,
