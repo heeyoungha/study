@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>시스템 헬스 추이</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; margin: 0; padding: 40px; }
+    .container { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); max-width: 900px; margin: 0 auto; padding: 32px; }
+    h2 { text-align: center; color: #333; margin-bottom: 32px; }
+    #healthChart { display: block; margin: 0 auto; }
+    .refresh-info { text-align: center; color: #888; margin-top: 10px; font-size: 0.95rem; }
+    .error-log-box {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin: 32px auto 0 auto;
+      max-width: 800px;
+      padding: 18px 20px;
+      color: #333;
+      font-size: 1rem;
+      min-height: 48px;
+      height: 200px;
+      overflow-y: auto;
+    }
+    .error-log-box ul { margin: 0; padding-left: 18px; }
+    .error-log-box li { margin-bottom: 4px; font-family: monospace; }
+    .error-log-title { font-weight: bold; margin-bottom: 8px; color: #b91c1c; }
+    .no-error { color: #888; }
+    .mem-proc-box { margin: 32px auto 0 auto; max-width: 800px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 18px 20px; }
+    .mem-proc-title { font-weight: bold; color: #2563eb; margin-bottom: 8px; display: block; }
+    #memProcTable { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    #memProcTable th, #memProcTable td { border: 1px solid #ddd; padding: 6px 10px; font-size: 0.97rem; }
+    #memProcTable th { background: #e0e7ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>시스템 헬스 추이 (최근 30회, 1분 간격)</h2>
+    <canvas id="healthChart" width="800" height="320"></canvas>
+    <div class="refresh-info">10초마다 자동 갱신됩니다.</div>
+    <div class="error-log-box" id="errorLogBox">
+      <span class="error-log-title">최근 30분간 에러로그</span>
+      <div class="no-error">최근 30분간 에러로그가 없습니다.</div>
+    </div>
+    <div class="mem-proc-box">
+      <span class="mem-proc-title">메모리 사용량 상위 5개 프로세스</span>
+      <table id="memProcTable">
+        <thead>
+          <tr><th>PID</th><th>프로세스명</th><th>메모리(MB)</th><th>비율(%)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    let chart;
+    async function drawChart() {
+      const res = await fetch('/python/admin/sys-health');
+      const data = await res.json();
+      const history = data.history || [];
+      if (history.length === 0) return;
+
+      const labels = history.map(h => new Date(h.timestamp).toLocaleTimeString());
+      const cpu = history.map(h => h.cpu_percent);
+      const mem = history.map(h => h.memory_percent);
+
+      const ctx = document.getElementById('healthChart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'CPU %', data: cpu, borderColor: '#007bff', backgroundColor: 'rgba(0,123,255,0.1)', fill: false, tension: 0.2 },
+            { label: 'Memory %', data: mem, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.1)', fill: false, tension: 0.2 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true, position: 'top' },
+            title: { display: false }
+          },
+          scales: {
+            y: { min: 0, max: 100, title: { display: true, text: 'Percent (%)' } },
+            x: { title: { display: true, text: '시간' } }
+          }
+        }
+      });
+
+      // 에러로그 표시
+      const errorLogBox = document.getElementById('errorLogBox');
+      const errorBlocks = data.recent_error_blocks || [];
+      let html = '<span class="error-log-title">최근 30분간 에러로그</span>';
+      if (errorBlocks.length > 0) {
+        html += errorBlocks.map(e => `<pre style="background:#fff3f3; border-radius:6px; margin:10px 0; padding:10px; overflow-x:auto;">${e}</pre>`).join('');
+      } else {
+        html += '<div class="no-error">최근 30분간 에러로그가 없습니다.</div>';
+      }
+      errorLogBox.innerHTML = html;
+
+      // 메모리 상위 프로세스 표시
+      const memProcTable = document.getElementById('memProcTable').querySelector('tbody');
+      memProcTable.innerHTML = '';
+      const totalMemMB = Math.round((data.total_memory || 0) / (1024 * 1024));
+      memProcTable.innerHTML += `<tr style="background:#e0e7ff;font-weight:bold;">
+        <td colspan="2">총 메모리</td>
+        <td style="text-align:right;">${totalMemMB}</td>
+        <td></td>
+      </tr>`;
+      (data.top_memory_processes || []).forEach(proc => {
+        memProcTable.innerHTML += `<tr>
+          <td>${proc.pid}</td>
+          <td>${proc.name}</td>
+          <td style="text-align:right;">${proc.memory_mb}</td>
+          <td style="text-align:right;">${proc.percent_of_total}</td>
+        </tr>`;
+      });
+    }
+    drawChart();
+    setInterval(drawChart, 10000); // 10초마다 갱신
+  </script>
+</body>
+</html> 

@@ -2,6 +2,7 @@ import uvicorn
 import asyncio
 from database import async_engine, Base
 from models import Diary, BookClubEntry
+import os
 
 async def init_db():
     """데이터베이스 테이블 초기화"""
@@ -19,7 +20,8 @@ async def main():
         host="0.0.0.0",
         port=8000,
         reload=True,
-        log_level="info"
+        log_level="info",
+        log_config=os.path.join(os.path.dirname(__file__), "log_config.yaml")
     )
 
 if __name__ == "__main__":

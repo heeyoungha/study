@@ -8,3 +8,5 @@ jinja2
 python-multipart
 alembic
 openai
+psutil
+pyyaml
