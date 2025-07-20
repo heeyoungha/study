@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
+from fastapi.responses import RedirectResponse
 from routes import diary, bookclub
 
 
@@ -14,5 +15,13 @@ app.include_router(diary.router)
 app.include_router(bookclub.router)
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"} 
+async def read_root():
+    return RedirectResponse(url="/docs")
+
+@app.get("/swagger")
+async def swagger_redirect():
+    return RedirectResponse(url="/docs")
+
+@app.get("/api-docs")
+async def api_docs_redirect():
+    return RedirectResponse(url="/docs") 

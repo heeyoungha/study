@@ -1,9 +1,9 @@
-#!/bin/sh
-set -e
+#!/bin/bash
 
-echo "=== Alembic migration start ==="
-alembic upgrade head
-echo "=== Alembic migration done ==="
+# 데이터베이스 연결 대기
+echo "데이터베이스 연결을 기다리는 중..."
+sleep 10
 
-echo "=== Starting FastAPI (uvicorn) ==="
-exec uvicorn app:app --host 0.0.0.0 --port 8000 
+# 비동기 서버 실행
+echo "비동기 FastAPI 서버를 시작합니다..."
+python run_async_server.py 

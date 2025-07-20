@@ -11,9 +11,11 @@ recommendation_map = {
 
 import json
 from models import Diary
-from database import SessionLocal
-from sqlalchemy.orm import Session
+from database import AsyncSessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from datetime import date
+import asyncio
 
 def analyze_sentiment(content: str) -> str:
     if any(word in content for word in positive_words):
@@ -22,7 +24,7 @@ def analyze_sentiment(content: str) -> str:
         return "negative"
     return "neutral"
 
-def save_diary(db: Session, summary: str, content: str, sentiment: str, recommended_projects: list = None):
+async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None):
     import json
     diary = Diary(
         summary=summary,
@@ -32,12 +34,13 @@ def save_diary(db: Session, summary: str, content: str, sentiment: str, recommen
         recommended_projects=json.dumps(recommended_projects or [])
     )
     db.add(diary)
-    db.commit()
-    db.refresh(diary)
+    await db.commit()
+    await db.refresh(diary)
     return diary
 
-def get_all_diaries(db: Session):
-    diaries = db.query(Diary).order_by(Diary.date.desc()).all()
+async def get_all_diaries_async(db: AsyncSession):
+    result = await db.execute(select(Diary).order_by(Diary.date.desc()))
+    diaries = result.scalars().all()
     import json
     for diary in diaries:
         diary.recommended_projects = json.loads(diary.recommended_projects or '[]')

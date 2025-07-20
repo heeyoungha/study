@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import List
-from database import SessionLocal
+from database import get_async_db
 from models import BookClubEntry
 from schemas import BookClubEntryCreate, BookClubEntryResponse
 from service import recommend_projects_from_review
@@ -15,14 +16,7 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '../templates'))
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def save_bookclub_entry(db, book_title, review, summary, entry_date):
+async def save_bookclub_entry_async(db: AsyncSession, book_title: str, review: str, summary: str, entry_date: date):
     recommended_projects = recommend_projects_from_review(review)
     db_entry = BookClubEntry(
         date=entry_date,
@@ -32,14 +26,14 @@ def save_bookclub_entry(db, book_title, review, summary, entry_date):
         recommended_projects=json.dumps(recommended_projects)
     )
     db.add(db_entry)
-    db.commit()
-    db.refresh(db_entry)
+    await db.commit()
+    await db.refresh(db_entry)
     return db_entry, recommended_projects
 
 # JSON API용
 @router.post("/bookclub/", response_model=BookClubEntryResponse)
-def create_bookclub_entry_api(entry: BookClubEntryCreate, db: Session = Depends(get_db)):
-    db_entry, recommended_projects = save_bookclub_entry(db, entry.book_title, entry.review, entry.summary, entry.date)
+async def create_bookclub_entry_api(entry: BookClubEntryCreate, db: AsyncSession = Depends(get_async_db)):
+    db_entry, recommended_projects = await save_bookclub_entry_async(db, entry.book_title, entry.review, entry.summary, entry.date)
     return BookClubEntryResponse(
         id=db_entry.id,
         date=db_entry.date,
@@ -51,23 +45,24 @@ def create_bookclub_entry_api(entry: BookClubEntryCreate, db: Session = Depends(
 
 # HTML Form 전송용
 @router.post("/bookclub/form")
-def create_bookclub_entry_form(
+async def create_bookclub_entry_form(
     book_title: str = Form(...),
     review: str = Form(...),
     summary: str = Form(...),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ):
     entry_date = date.today()
-    save_bookclub_entry(db, book_title, review, summary, entry_date)
+    await save_bookclub_entry_async(db, book_title, review, summary, entry_date)
     return RedirectResponse(url="/bookclub/list", status_code=303)
 
 @router.get("/bookclub")
-def bookclub_form(request: Request):
+async def bookclub_form(request: Request):
     return templates.TemplateResponse("bookclub-form.html", {"request": request})
 
 @router.get("/bookclub/list")
-def bookclub_list(request: Request, db: Session = Depends(get_db)):
-    entries = db.query(BookClubEntry).order_by(BookClubEntry.date.desc()).all()
+async def bookclub_list(request: Request, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(BookClubEntry).order_by(BookClubEntry.date.desc()))
+    entries = result.scalars().all()
     result = []
     for entry in entries:
         recommended_projects = json.loads(entry.recommended_projects or '[]')
@@ -82,8 +77,9 @@ def bookclub_list(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("bookclub-list.html", {"request": request, "entries": result})
 
 @router.get("/bookclub/", response_model=List[BookClubEntryResponse])
-def get_bookclub_entries(db: Session = Depends(get_db)):
-    entries = db.query(BookClubEntry).order_by(BookClubEntry.date.desc()).all()
+async def get_bookclub_entries(db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(BookClubEntry).order_by(BookClubEntry.date.desc()))
+    entries = result.scalars().all()
     result = []
     for entry in entries:
         recommended_projects = json.loads(entry.recommended_projects or '[]')
@@ -97,8 +93,9 @@ def get_bookclub_entries(db: Session = Depends(get_db)):
     return result
 
 @router.get("/bookclub/{entry_id}")
-def bookclub_detail(entry_id: int, request: Request, db: Session = Depends(get_db)):
-    entry = db.query(BookClubEntry).filter(BookClubEntry.id == entry_id).first()
+async def bookclub_detail(entry_id: int, request: Request, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(BookClubEntry).filter(BookClubEntry.id == entry_id))
+    entry = result.scalar_one_or_none()
     if not entry:
         return templates.TemplateResponse("bookclub-result.html", {"request": request, "error": "존재하지 않는 독후감입니다."})
     import json
