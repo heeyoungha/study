@@ -57,3 +57,11 @@ async def swagger_redirect():
 @app.get("/python/api-docs")
 async def api_docs_redirect():
     return RedirectResponse(url="/docs")
+
+@app.get("/python/test-proto")
+async def test_proto(request: Request):
+    return JSONResponse({
+        "url": str(request.url),
+        "base_url": str(request.base_url),
+        "headers": dict(request.headers)
+    })

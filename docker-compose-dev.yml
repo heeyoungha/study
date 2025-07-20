@@ -31,7 +31,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CAFE_RECOMMENDATION_BASE_URL=https://letsadam.shop/dir/
     depends_on:
-      - db
+      - mysql
     ports:
       - "8080:8080"
     networks:
@@ -50,11 +50,35 @@ services:
       - /etc/letsencrypt/live/letsadam.shop:/etc/letsencrypt/live/letsadam.shop:ro
       - /etc/letsencrypt/archive/letsadam.shop:/etc/letsencrypt/archive/letsadam.shop:ro
       - ./src/main/resources/static:/var/www/html
+      - ./python-api/static:/var/www/html/static #파이썬 정적파일
     depends_on:
       - app
+      - python-api
     networks:
       - backend
 
+  python-api:
+    build:
+      context: ./python-api
+      dockerfile: Dockerfile
+    image: python-api:latest
+    container_name: python-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATASOURCE_HOST=mysql
+      - DATASOURCE_PORT=3306
+      - DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - DATASOURCE_DB=study
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    networks:
+      - backend
 
 networks:
   backend:
