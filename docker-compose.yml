@@ -23,6 +23,7 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CAFE_RECOMMENDATION_BASE_URL=http://localhost:8080/dir/
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     env_file:
       - .env
     depends_on:
@@ -90,6 +91,7 @@ services:
       - DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - DATASOURCE_DB=study
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     env_file:
       - .env
     depends_on:
