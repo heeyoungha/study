@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>독서모임 - 목록</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/common.css') }}">
+    <link rel="stylesheet" href="/python-static/css/common.css">
 </head>
 <body>
     {% include 'fragment/nav.html' %}
@@ -19,6 +19,7 @@
                         <th>작성일</th>
                         <th>연관 프로젝트</th>
                         <th>한줄소감</th>
+                        <th>작성자</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,7 @@
                             {% endif %}
                         </td>
                         <td>{{ entry.summary }}</td>
+                        <td>{{ entry.username }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
