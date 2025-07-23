@@ -11,3 +11,4 @@ openai
 psutil
 pyyaml
 cryptography # MySQL 데이터베이스에 접속할 때 사용하는 인증 방식(sha256_password 또는 caching_sha2_password)에 필요한 cryptography 패키지
+pyjwt

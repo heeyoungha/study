@@ -33,14 +33,15 @@ async def analyze_sentiment_enhanced(content: str) -> dict:
     """
     return await analyze_sentiment_with_gpt(content)
 
-async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None):
+async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None, user_id: int = None):
     import json
     diary = Diary(
         summary=summary,
         content=content, 
         sentiment=sentiment,
         date=date.today(),
-        recommended_projects=json.dumps(recommended_projects or [])
+        recommended_projects=json.dumps(recommended_projects or []),
+        user_id=user_id
     )
     db.add(diary)
     await db.commit()
@@ -48,11 +49,28 @@ async def save_diary_async(db: AsyncSession, summary: str, content: str, sentime
     return diary
 
 async def get_all_diaries_async(db: AsyncSession):
-    result = await db.execute(select(Diary).order_by(Diary.date.desc()))
-    diaries = result.scalars().all()
-    import json
-    for diary in diaries:
+    from models import User
+    from sqlalchemy.orm import selectinload
+    
+    # User 테이블과 조인하여 작성자 정보도 함께 가져오기 (is_deleted = false 조건 추가)
+    result = await db.execute(
+        select(Diary, User.username)
+        .outerjoin(User, (Diary.user_id == User.id) & (User.is_deleted == False))
+        .order_by(Diary.date.desc())
+    )
+    
+    # 결과를 튜플로 받아서 처리
+    diary_user_tuples = result.all()
+    diaries = []
+    for i, (diary, username) in enumerate(diary_user_tuples):
+
+        # recommended_projects를 JSON에서 파싱
+        import json
         diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
+        # username 속성 추가
+        diary.username = username or "알 수 없음"
+        diaries.append(diary)
+
     return diaries
 
 # 새로운 비동기 프로젝트 추천 (GPT 사용)

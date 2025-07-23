@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>일기 목록</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/common.css') }}">
+    <link rel="stylesheet" href="/python-static/css/common.css">
 </head>
 <body>
     {% include 'fragment/nav.html' %}
@@ -19,6 +19,7 @@
                         <th>날짜</th>
                         <th>한줄일기(제목)</th>
                         <th>연관 프로젝트</th>
+                        <th>작성자</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,6 +36,7 @@
                                 </ul>
                             {% endif %}
                         </td>
+                        <td>{{ diary.username }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

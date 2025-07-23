@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, Request, Form, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,9 +8,14 @@ from database import get_async_db
 from models import Diary
 from datetime import date
 from sqlalchemy import select
+from fastapi import Depends
 import os
 from gpt_service import client
 import logging
+import json
+from jwt_service import get_user_info_from_jwt
+from typing import Optional
+from jwt_service import get_current_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +28,13 @@ async def diary_form(request: Request):
     return templates.TemplateResponse("diary/diary-form.html", {"request": request})
 
 @router.post("/diary", response_class=HTMLResponse)
-async def diary_submit(request: Request, summary: str = Form(...), content: str = Form(...), db: AsyncSession = Depends(get_async_db)):
+async def diary_submit(
+    request: Request, 
+    summary: str = Form(...), 
+    content: str = Form(...), 
+    db: AsyncSession = Depends(get_async_db),
+    user_id: Optional[int] = Depends(get_current_user_id)
+):
     # GPT를 사용한 향상된 감정 분석
     sentiment_result = await analyze_sentiment_enhanced(content)
     sentiment = sentiment_result["sentiment"]
@@ -32,20 +43,36 @@ async def diary_submit(request: Request, summary: str = Form(...), content: str 
     recommendation_result = await recommend_projects_enhanced(content, sentiment)
     recommended_projects = recommendation_result["projects"]
     
-    await save_diary_async(db, summary, content, sentiment, recommended_projects)
+    # 일기 저장 시 user_id 전달
+    await save_diary_async(db, summary, content, sentiment, recommended_projects, user_id)
     return RedirectResponse(url="/diary/list", status_code=303)
 
 @router.get("/diary/list", response_class=HTMLResponse)
-async def diary_list(request: Request, db: AsyncSession = Depends(get_async_db)):
+async def diary_list(
+    request: Request, 
+    db: AsyncSession = Depends(get_async_db),
+    current_user_id: Optional[int] = Depends(get_current_user_id)
+):
+
+    # 현재 사용자의 일기만 조회 (로그인한 경우) 또는 모든 일기 조회 (비로그인 시)
+    # if current_user_id:
+    #     diaries = await get_user_diaries_async(db, current_user_id)  # 사용자별 일기 조회 함수 필요
+    # else:
+    #     diaries = await get_all_diaries_async(db)  # 또는 빈 리스트 반환
+    
     diaries = await get_all_diaries_async(db)
     result = []
-    for diary in diaries:
-        result.append({
+    for i, diary in enumerate(diaries):
+        diary_data = {
             "id": diary.id,
             "date": diary.date,
             "summary": diary.summary,
-            "recommended_projects": diary.recommended_projects
-        })
+            "recommended_projects": diary.recommended_projects,
+            "user_id": diary.user_id,
+            "username": getattr(diary, 'username', '알 수 없음')  # username 속성이 없을 경우 기본값
+        }
+        result.append(diary_data)
+    
     return templates.TemplateResponse("diary/diary-list.html", {"request": request, "diaries": result})
 
 @router.get("/diary/{diary_id}", response_class=HTMLResponse)

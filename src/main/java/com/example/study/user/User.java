@@ -16,7 +16,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLRestriction("status <> 'DELETED'")
+@SQLRestriction("is_deleted = false")
 public class User extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,6 @@ public class User extends BaseEntity {
     private String email;
     private String role;
     private String pw;
-    @Column(name = "status")
-    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_user_id")

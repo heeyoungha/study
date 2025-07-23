@@ -16,76 +16,136 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 @Slf4j
+@Transactional
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     //DefaultOAuth2UserService OAuth2UserService의 구현체
 
     private final UserRepository userRepository;
 
-    @Autowired
-    private HttpSession session;
+    private final HttpSession session;
 
-    public CustomOAuth2UserService(UserRepository userRepository) {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Value("${jwt.expiration.ms:86400000}")
+    private long jwtExpirationMs;
+
+    public CustomOAuth2UserService(UserRepository userRepository, HttpSession session) {
 
         this.userRepository = userRepository;
+        this.session = session;
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
-        log.info("OAuth2 User Request Details: {}", userRequest);
-
+        log.info("=== CustomOAuth2UserService.loadUser 시작 ===");
+        
         OAuth2User oAuth2User = super.loadUser(userRequest);
+        log.info("OAuth2User 로드 완료: {}", oAuth2User.getName());
 
-        log.debug("OAuth2 User Attributes: {}", oAuth2User.getAttributes());
-
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        log.info("Authentication Registration ID: {}", registrationId);
+        String provider = userRequest.getClientRegistration().getRegistrationId();
+        log.info("Provider: {}", provider);
 
         OAuth2Response oAuth2Response = null;
-
-        if (registrationId.equals("naver")) {
-
+        if (provider.equals("naver")) {
             oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-        }
-        else if (registrationId.equals("google")) {
-
+        } else if (provider.equals("google")) {
             oAuth2Response = new GoogleReponse(oAuth2User.getAttributes());
-        }
-        else {
-
+        } else {
             return null;
         }
 
         String username = oAuth2Response.getName();
+        log.info("Username: {}", username);
+        
+        log.info("=== 사용자 조회 시작 ===");
         User existData = userRepository.findByUsername(username);
-
-        // 로그인 성공 시 세션에 username 저장
-        session.setAttribute("username", username);
+        log.info("기존 사용자 조회 결과: {}", existData != null ? "존재함" : "존재하지 않음");
 
         String role = "ROLE_USER";
         User user;
+        
         if (existData == null) {
-
+            log.info("=== 새 사용자 생성 시작 ===");
             user = User.builder()
                     .username(username)
                     .email(oAuth2Response.getEmail())
                     .role(role)
                     .build();
+            log.info("새 사용자 객체 생성: {}", user);
 
+            log.info("=== 사용자 저장 시작 ===");
             user = userRepository.save(user);
-        }
-        else {
-
+            log.info("사용자 저장 완료 - ID: {}, Username: {}", user.getId(), user.getUsername());
+            
+            // 트랜잭션 강제 커밋 확인
+            log.info("=== 트랜잭션 강제 커밋 시작 ===");
+            entityManager.flush();
+            entityManager.clear();
+            log.info("트랜잭션 flush/clear 완료");
+            
+            // 저장 후 다시 조회해서 확인
+            User savedUser = userRepository.findById(user.getId()).orElse(null);
+            log.info("저장 후 조회 결과: {}", savedUser != null ? "성공" : "실패");
+            if (savedUser != null) {
+                log.info("저장된 사용자 정보 - ID: {}, Username: {}, Email: {}", 
+                    savedUser.getId(), savedUser.getUsername(), savedUser.getEmail());
+            }
+            
+        } else {
+            log.info("=== 기존 사용자 업데이트 시작 ===");
             existData.updatOauthUser(username, oAuth2Response.getEmail());
             role = existData.getRole();
+            log.info("기존 사용자 업데이트 완료");
 
             user = userRepository.save(existData);
+            log.info("기존 사용자 저장 완료 - ID: {}, Username: {}", user.getId(), user.getUsername());
+            
+            // 트랜잭션 강제 커밋 확인
+            log.info("=== 트랜잭션 강제 커밋 시작 ===");
+            entityManager.flush();
+            entityManager.clear();
+            log.info("트랜잭션 flush/clear 완료");
         }
 
+        // 로그인 성공 시 세션에 username 저장
+        session.setAttribute("username", username);
+        session.setAttribute("userId", user.getId());
+        log.info("세션에 사용자 정보 저장 완료 - username: {}, userId: {}", username, user.getId());
+
+        log.info("=== CustomOAuth2UserService.loadUser 완료 ===");
         return new CustomOAuth2User(oAuth2Response, role, user.getId());
+    }
+
+    public String generateJwtToken(User user) {
+
+        String secret = System.getenv("JWT_SECRET_KEY"); // 또는 yml에서 불러오기
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.builder()
+            .setSubject(user.getId().toString())
+            .claim("username", user.getUsername())
+            .claim("email", user.getEmail())
+            .claim("role", user.getRole())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
     }
 
     public static class CustomOAuth2User implements OAuth2User {

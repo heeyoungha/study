@@ -3,19 +3,7 @@
 <html>
 <head>
     <title>독서모임 - 결과</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .result { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .recommendations { background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; }
-        .recommendations h3 { color: #0056b3; margin-top: 0; }
-        .recommendations ul { margin: 10px 0; }
-        .recommendations li { margin: 5px 0; }
-        .nav { margin-bottom: 30px; }
-        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
-        .actions { margin-top: 20px; }
-        .actions a { display: inline-block; margin-right: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-        .actions a:hover { background-color: #0056b3; }
-    </style>
+    <link rel="stylesheet" href="/python-static/css/common.css">
 </head>
 <body>
     <h1>독서모임 상세</h1>
@@ -25,6 +13,7 @@
         <div class="result">
             <h2>📚 {{ entry.book_title }}</h2>
             <p><strong>작성일:</strong> {{ entry.date }}</p>
+            <p><strong>작성자:</strong> {{ entry.username }}</p>
             <p><strong>한줄소감:</strong> {{ entry.summary }}</p>
             <p><strong>소감문:</strong></p>
             <p>{{ entry.review }}</p>
