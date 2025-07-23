@@ -8,7 +8,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.Map;
 
+@Slf4j
 @Controller
 public class LoginController {
 
@@ -39,5 +46,22 @@ public class LoginController {
             - Server Port: %d
             """,
             secure, forwardedProto, forwardedFor, realIp, scheme, serverName, serverPort);
+    }
+
+    @GetMapping("/debug-all")
+    @ResponseBody
+    public Map<String, Object> debugAll(HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("session_userId", session.getAttribute("userId"));
+        result.put("session_username", session.getAttribute("username"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        result.put("authentication", auth != null ? auth.toString() : null);
+        if (auth != null) {
+            result.put("isAuthenticated", auth.isAuthenticated());
+            result.put("principal", auth.getPrincipal());
+            result.put("authorities", auth.getAuthorities());
+        }
+        return result;
     }
 }
