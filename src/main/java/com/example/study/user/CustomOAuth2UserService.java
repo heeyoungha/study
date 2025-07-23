@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import io.jsonwebtoken.Jwts;
@@ -27,15 +28,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Slf4j
 @Transactional
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     //DefaultOAuth2UserService OAuth2UserService의 구현체
 
     private final UserRepository userRepository;
-
     private final HttpSession session;
 
     @PersistenceContext
@@ -43,12 +45,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Value("${jwt.expiration.ms:86400000}")
     private long jwtExpirationMs;
-
-    public CustomOAuth2UserService(UserRepository userRepository, HttpSession session) {
-
-        this.userRepository = userRepository;
-        this.session = session;
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -126,6 +122,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 로그인 성공 시 세션에 username 저장
         session.setAttribute("username", username);
         session.setAttribute("userId", user.getId());
+        
+        // JWT 토큰 생성 및 쿠키 설정
+        String jwt = generateJwtToken(user);
+        session.setAttribute("jwt", jwt);
+        
         log.info("세션에 사용자 정보 저장 완료 - username: {}, userId: {}", username, user.getId());
 
         log.info("=== CustomOAuth2UserService.loadUser 완료 ===");
@@ -167,8 +168,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         @Override
         public Map<String, Object> getAttributes() {
-
-            return null;
+            Map<String, Object> attributes = new HashMap<>();
+            attributes.put("name", oAuth2Response.getName());
+            attributes.put("email", oAuth2Response.getEmail());
+            attributes.put("provider", oAuth2Response.getProvider());
+            attributes.put("providerId", oAuth2Response.getProviderId());
+            return attributes;
         }
 
         @Override
