@@ -19,6 +19,15 @@ import java.io.IOException;
 import java.util.Map;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.study.config.JwtAuthenticationFilter;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +37,7 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${spring.profiles.active:local}")
     private String activeProfile;
@@ -48,13 +58,22 @@ public class SecurityConfig {
             http
                     .httpBasic((basic) -> basic.disable());
 
+            // 세션 비활성화 (JWT 사용)
+            http
+                    .sessionManagement((session) -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
             http
                     .oauth2Login((oauth2) -> oauth2
                             .loginPage("/login")
                             .userInfoEndpoint((userInfoEndpointConfig) ->
                                     userInfoEndpointConfig.userService(customOAuth2UserService))
-                            .defaultSuccessUrl("/", true)
+                            .successHandler(oauth2AuthenticationSuccessHandler())
                     );
+
+            // JWT 필터 추가
+            http
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
             // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
             http
@@ -78,4 +97,32 @@ public class SecurityConfig {
         }
     }
 
+    @Bean
+    public AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request, 
+                                            HttpServletResponse response, 
+                                            Authentication authentication) throws IOException, ServletException {
+                
+                if (authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
+                    CustomOAuth2UserService.CustomOAuth2User oauth2User = 
+                        (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
+                    
+                    // JWT 토큰 생성
+                    String jwt = customOAuth2UserService.generateJwtToken(oauth2User.getUserId());
+                    
+                    // JWT를 쿠키에 설정
+                    Cookie jwtCookie = new Cookie("jwt", jwt);
+                    jwtCookie.setHttpOnly(true);
+                    jwtCookie.setSecure("dev".equals(activeProfile) || "prod".equals(activeProfile));
+                    jwtCookie.setPath("/");
+                    jwtCookie.setMaxAge(86400); // 24시간
+                    response.addCookie(jwtCookie);
+                }
+                
+                super.onAuthenticationSuccess(request, response, authentication);
+            }
+        };
+    }
 }

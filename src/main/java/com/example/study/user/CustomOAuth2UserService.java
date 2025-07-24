@@ -3,7 +3,6 @@ package com.example.study.user;
 import com.example.study.user.dto.GoogleReponse;
 import com.example.study.user.dto.NaverResponse;
 import com.example.study.user.dto.OAuth2Response;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -38,7 +37,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     //DefaultOAuth2UserService OAuth2UserService의 구현체
 
     private final UserRepository userRepository;
-    private final HttpSession session;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -119,21 +117,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.info("트랜잭션 flush/clear 완료");
         }
 
-        // 로그인 성공 시 세션에 username 저장
-        session.setAttribute("username", username);
-        session.setAttribute("userId", user.getId());
-        
-        // JWT 토큰 생성 및 쿠키 설정
-        String jwt = generateJwtToken(user);
-        session.setAttribute("jwt", jwt);
-        
-        log.info("세션에 사용자 정보 저장 완료 - username: {}, userId: {}", username, user.getId());
-
         log.info("=== CustomOAuth2UserService.loadUser 완료 ===");
         return new CustomOAuth2User(oAuth2Response, role, user.getId());
     }
 
-    public String generateJwtToken(User user) {
+    public String generateJwtToken(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
         String secret = System.getenv("JWT_SECRET_KEY"); // 또는 yml에서 불러오기
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

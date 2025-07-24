@@ -50,17 +50,16 @@ public class LoginController {
 
     @GetMapping("/debug-all")
     @ResponseBody
-    public Map<String, Object> debugAll(HttpSession session) {
+    public Map<String, Object> debugAll() {
         Map<String, Object> result = new HashMap<>();
-        result.put("session_userId", session.getAttribute("userId"));
-        result.put("session_username", session.getAttribute("username"));
-
+        
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         result.put("authentication", auth != null ? auth.toString() : null);
         if (auth != null) {
             result.put("isAuthenticated", auth.isAuthenticated());
             result.put("principal", auth.getPrincipal());
             result.put("authorities", auth.getAuthorities());
+            result.put("auth.name", auth.getName());
         }
         return result;
     }
