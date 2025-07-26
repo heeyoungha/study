@@ -23,7 +23,7 @@ echo "6. 이미지 빌드 및 컨테이너 실행"
 docker-compose up --build -d
 
 echo "7. 이미지 목록 확인"
-docker image ls | grep -E 'study-app|mysql|nginx|python-api'
+docker image ls | grep -E 'study-app|mysql|nginx|python-api|django-commerce'
 
 echo "8. 앱 이미지 태그 확인"
 APP_IMAGE_TAG=$(docker images study-app:latest --format "table {{.Repository}}:{{.Tag}}" | tail -n +2)
@@ -39,6 +39,7 @@ echo "9. 모든 이미지 하나로 저장"
 docker save -o all_images.tar \
     "study-app:latest" \
     mysql:8.0 \
+    django-commerce \
     python-api \
     nginx:alpine
 
