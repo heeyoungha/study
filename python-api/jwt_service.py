@@ -7,13 +7,14 @@ from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 
-JWT_SECRET = os.getenv("JWT_SECRET", "my_jwt_secret")
-JWT_ALGORITHM = "HS512"
+# Spring Boot와 동일한 환경변수 사용
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default-jwt-secret")
+JWT_ALGORITHM = "HS256"  # Spring Boot와 동일한 알고리즘 사용
 
 def get_user_info_from_jwt(token: str):
-    secret = os.getenv("JWT_SECRET_KEY")
     try:
-        payload = jwt.decode(token, secret, algorithms=["HS512"])
+        # Spring Boot와 동일한 시크릿 키와 알고리즘 사용
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return {
             "user_id": int(payload.get("sub")),
             "username": payload.get("username"),
@@ -22,7 +23,7 @@ def get_user_info_from_jwt(token: str):
         }
     except Exception as e:
         logger.error(f"[ERROR] get_user_info_from_jwt 디코딩 실패: {e}")
-        return None 
+        return None
         
 async def get_current_user(jwt: str = Cookie(None)) -> Optional[Dict]:
     """JWT에서 현재 사용자 정보를 추출하는 의존성"""
