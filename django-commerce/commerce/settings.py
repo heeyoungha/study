@@ -176,9 +176,51 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/commerce/django-static/'
+STATIC_ROOT = '/app/staticfiles'
+
+# 추가 정적 파일 디렉토리
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django Admin 로그인 URL 설정 (FORCE_SCRIPT_NAME 고려)
+LOGIN_URL = 'admin:login'
+LOGIN_REDIRECT_URL = 'admin:index'
+
+# Django Admin 설정
+ADMIN_SITE_HEADER = "Django Commerce Admin"
+ADMIN_SITE_TITLE = "Django Commerce Admin Portal"
+ADMIN_INDEX_TITLE = "Welcome to Django Commerce Admin"
+
+# FORCE_SCRIPT_NAME 설정 (nginx /commerce 프리픽스 처리)
+FORCE_SCRIPT_NAME = '/commerce'
+
+# CSRF 설정 (서브도메인 환경용)
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost',
+    'http://localhost',
+    'https://127.0.0.1',
+    'http://127.0.0.1',
+]
+
+# CSRF 쿠키 설정
+CSRF_COOKIE_SECURE = False  # 개발 환경에서는 False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = None  # 모든 크로스 사이트 요청 허용
+CSRF_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용
+
+# 세션 쿠키 설정
+SESSION_COOKIE_SECURE = False  # 개발 환경에서는 False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = None  # 모든 크로스 사이트 요청 허용
+SESSION_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용
+
+# CSRF 검증 예외 설정 (개발 환경용)
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+ 
