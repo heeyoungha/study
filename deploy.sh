@@ -7,19 +7,12 @@ echo "=== Creating required directories ==="
 # 로그 디렉토리 생성
 mkdir -p logs/app logs/nginx logs/django
 
-# 데이터 디렉토리 생성
-mkdir -p data/mysql
-
 # Django 디렉토리 생성
 mkdir -p django-commerce/media django-commerce/staticfiles
 
 echo "=== Setting directory permissions ==="
-# MySQL 데이터 디렉토리 권한 설정 (MySQL 사용자: 999)
-sudo chown -R 999:999 data/mysql 2>/dev/null || echo "Warning: Could not set MySQL directory permissions"
-
 # 로그 디렉토리 권한 설정
 chmod -R 755 logs/
-chmod -R 755 data/
 
 # Django 디렉토리 권한 설정
 chmod -R 755 django-commerce/media
@@ -30,9 +23,9 @@ echo "Directories created:"
 echo "- logs/app (Spring Boot logs)"
 echo "- logs/nginx (Nginx logs)"
 echo "- logs/django (Django logs)"
-echo "- data/mysql (MySQL data)"
 echo "- django-commerce/media (Django media files)"
 echo "- django-commerce/staticfiles (Django static files)"
+echo "- MySQL data (Docker volume: mysql_data)"
 
 echo "=== Starting Docker Compose ==="
 # 기존 컨테이너 정리

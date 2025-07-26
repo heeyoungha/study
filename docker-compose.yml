@@ -46,7 +46,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./database/config/my.conf:/etc/mysql/conf.d/my.cnf
       - ./database/init:/docker-entrypoint-initdb.d
     networks:
@@ -155,4 +155,5 @@ networks:
     driver: bridge
 
 volumes:
-  # 모든 volume을 로컬 마운트로 변경했으므로 named volume 불필요
+  mysql_data:
+    driver: local
