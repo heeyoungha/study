@@ -46,6 +46,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # JWT 토큰 설정
@@ -90,6 +91,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'drf_spectacular',
     'store',
 ]
 
@@ -197,6 +199,20 @@ LOGIN_REDIRECT_URL = 'admin:index'
 ADMIN_SITE_HEADER = "Django Commerce Admin"
 ADMIN_SITE_TITLE = "Django Commerce Admin Portal"
 ADMIN_INDEX_TITLE = "Welcome to Django Commerce Admin"
+
+# Spectacular 설정 (Swagger/OpenAPI)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Django Commerce API',
+    'DESCRIPTION': 'Django Commerce REST API 문서',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+    },
+}
 
 # FORCE_SCRIPT_NAME 설정 (nginx /commerce 프리픽스 처리)
 FORCE_SCRIPT_NAME = '/commerce'
