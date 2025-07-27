@@ -72,7 +72,7 @@
         const services = [
             {
                 name: 'Spring Boot',
-                url: '/api/monitoring/system-health',
+                url: '/monitoring/system-health',
                 port: 8080,
                 color: '#e74c3c'
             },
@@ -156,7 +156,9 @@
                     `<div class="error-log">${block}</div>`
                 ).join('');
             } else {
-                errorsEl.innerHTML = '<div style="text-align: center; color: #666;">에러 로그 없음</div>';
+                // 에러 로그 상태 정보가 있으면 표시
+                const errorStatus = data.error_log_status || '에러 로그 없음';
+                errorsEl.innerHTML = `<div style="text-align: center; color: #666;">${errorStatus}</div>`;
             }
 
             // 차트 업데이트 (간단한 히스토리 표시)
@@ -229,7 +231,7 @@
 
         async function fetchHostInfo() {
             try {
-                const response = await fetch('/api/monitoring/host-health');
+                const response = await fetch('/monitoring/host-health');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -303,16 +305,21 @@
 
         async function testAll500() {
             const testUrls = [
-                '/api/monitoring/test-500',
+                '/monitoring/test-500',
                 '/python/admin/test-500',
                 '/commerce/monitoring/test-500/'
             ];
 
             for (const url of testUrls) {
                 try {
-                    await fetch(url);
+                    const response = await fetch(url);
+                    if (response.status === 500) {
+                        console.log(`500 에러 테스트 성공: ${url}`);
+                    } else {
+                        console.log(`예상과 다른 상태 코드: ${response.status} for ${url}`);
+                    }
                 } catch (error) {
-                    console.log(`500 에러 테스트 완료: ${url}`);
+                    console.log(`네트워크 오류: ${url} - ${error.message}`);
                 }
             }
 

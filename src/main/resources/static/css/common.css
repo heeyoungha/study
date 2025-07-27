@@ -423,3 +423,14 @@ p {
     background-color: #0056b3;
     text-decoration: underline;
 }
+
+.content-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.index-img{
+    width: 70%;
+}
+
