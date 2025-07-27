@@ -19,14 +19,14 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadMXBean;
 
 @RestController
-@RequestMapping("/api/monitoring")
+@RequestMapping("/monitoring")
 public class MonitoringApiController {
     
     private static final Logger log = LoggerFactory.getLogger(MonitoringApiController.class);
     private static final int MAX_HISTORY_SIZE = 30;
     private static Instant lastHistoryTime = null;
 
-    @GetMapping("/system-health")
+    @GetMapping("/sys-health")
     public Map<String, Object> systemHealth() {
         Map<String, Object> result = new HashMap<>();
         
@@ -143,10 +143,8 @@ public class MonitoringApiController {
 
     @GetMapping("/test-500")
     public ResponseEntity<Map<String, Object>> test500() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("error", "테스트용 500 에러");
-        result.put("timestamp", Instant.now().toString());
-        return ResponseEntity.status(500).body(result);
+
+        throw new RuntimeException("테스트용 500 에러 발생!");
     }
 
     // 기존 AdminHealthController의 헬퍼 메서드들
@@ -155,7 +153,7 @@ public class MonitoringApiController {
     private void updateHealthHistory(double cpuPercent, double memoryPercent) {
         Instant now = Instant.now();
         
-        if (lastHistoryTime == null || now.minusSeconds(30).isAfter(lastHistoryTime)) {
+        if (lastHistoryTime == null || now.minusSeconds(60).isAfter(lastHistoryTime)) {
             Map<String, Object> historyEntry = new HashMap<>();
             historyEntry.put("cpu_percent", cpuPercent);
             historyEntry.put("memory_percent", memoryPercent);

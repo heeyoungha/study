@@ -13,30 +13,7 @@
             <p>모든 서비스의 상태를 한눈에 확인하세요</p>
         </div>
 
-        <div class="host-info" id="hostInfo">
-            <div class="host-card">
-                <div class="card-header">
-                    <h3>🖥️ 호스트 시스템</h3>
-                    <div class="status-indicator" id="hostStatus">정상</div>
-                </div>
-                <div class="card-content">
-                    <div class="metric">
-                        <span class="label">CPU 사용률:</span>
-                        <span class="value" id="hostCpu">--</span>
-                        <small class="note">(컨테이너 기준)</small>
-                    </div>
-                    <div class="metric">
-                        <span class="label">메모리 사용률:</span>
-                        <span class="value" id="hostMemory">--</span>
-                        <small class="note">(컨테이너 기준)</small>
-                    </div>
-                    <div class="metric">
-                        <span class="label">업타임:</span>
-                        <span class="value" id="hostUptime">--</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- 호스트 정보 섹션 제거 -->
 
         <div class="controls">
             <button class="btn" onclick="refreshAll()">🔄 새로고침</button>
@@ -72,7 +49,7 @@
         const services = [
             {
                 name: 'Spring Boot',
-                url: '/monitoring/system-health',
+                url: '/monitoring/sys-health',
                 port: 8080,
                 color: '#e74c3c'
             },
@@ -167,39 +144,135 @@
 
         function updateChart(cardId, history) {
             const chartEl = document.getElementById(`chart-${cardId}`);
-            if (!history || history.length === 0) return;
+            if (!chartEl) {
+                console.error(`Chart element not found: chart-${cardId}`);
+                return;
+            }
+            
+            if (!history || history.length === 0) {
+                // 데이터가 없을 때 기본 차트 표시
+                chartEl.innerHTML = `
+                    <svg width="100%" height="100%" viewBox="0 0 400 200">
+                        <text x="200" y="100" text-anchor="middle" font-size="14" fill="#999">데이터 없음</text>
+                    </svg>
+                `;
+                return;
+            }
 
             const cpuData = history.map(h => h.cpu_percent || 0).filter(v => !isNaN(v));
             const memoryData = history.map(h => h.memory_percent || 0).filter(v => !isNaN(v));
 
-            // 데이터가 없으면 차트를 표시하지 않음
-            if (cpuData.length === 0 && memoryData.length === 0) return;
+            console.log(`Chart ${cardId}:`, { 
+                historyLength: history.length, 
+                cpuDataLength: cpuData.length, 
+                memoryDataLength: memoryData.length,
+                cpuData: cpuData,
+                memoryData: memoryData
+            });
 
             // 간단한 라인 차트 생성
-            let svg = `<svg width="100%" height="100%" viewBox="0 0 300 150">`;
+            let svg = `<svg width="100%" height="100%" viewBox="0 0 400 250">`;
+            
+            // Y축 눈금과 값 추가
+            for (let i = 0; i <= 4; i++) {
+                const y = 250 - (i * 60);
+                const value = i * 25;
+                svg += `<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="#ddd" stroke-width="1" stroke-dasharray="5,5" />`;
+                svg += `<text x="5" y="${y + 3}" font-size="12" fill="#666">${value}%</text>`;
+            }
+            
+            // X축 눈금 (시간 표시) - 데이터 포인트가 많을 때는 일부만 표시
+            if (cpuData.length > 1) {
+                const step = Math.max(1, Math.floor(cpuData.length / 4));
+                for (let i = 0; i < cpuData.length; i += step) {
+                    const x = (i / (cpuData.length - 1)) * 400;
+                    svg += `<line x1="${x}" y1="0" x2="${x}" y2="250" stroke="#ddd" stroke-width="1" stroke-dasharray="5,5" />`;
+                }
+            }
             
             // CPU 차트 (파란색)
-            if (cpuData.length > 1) {
-                const cpuPoints = cpuData.map((v, i) => {
-                    const x = (i / (cpuData.length - 1)) * 300;
-                    const y = 150 - (v / 100) * 150;
-                    return `${x},${y}`;
-                }).join(' ');
-                svg += `<polyline points="${cpuPoints}" fill="none" stroke="#3498db" stroke-width="2" />`;
+            if (cpuData.length >= 1) {
+                if (cpuData.length === 1) {
+                    // 데이터가 1개일 때는 수평선으로 표시
+                    const y = 250 - (cpuData[0] / 100) * 250;
+                    svg += `<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="#3498db" stroke-width="3" />`;
+                    svg += `<circle cx="200" cy="${y}" r="4" fill="#3498db" />`;
+                    svg += `<text x="210" y="${y - 8}" font-size="10" fill="#3498db">${cpuData[0].toFixed(1)}%</text>`;
+                } else {
+                    // 여러 데이터 포인트일 때는 라인 차트
+                    const cpuPoints = cpuData.map((v, i) => {
+                        const x = (i / (cpuData.length - 1)) * 400;
+                        const y = 250 - (v / 100) * 250;
+                        return `${x},${y}`;
+                    }).join(' ');
+                    svg += `<polyline points="${cpuPoints}" fill="none" stroke="#3498db" stroke-width="3" />`;
+                    
+                    // CPU 값 표시 - 데이터 포인트가 많을 때는 일부만 표시
+                    const step = Math.max(1, Math.floor(cpuData.length / 6));
+                    cpuData.forEach((v, i) => {
+                        if (i % step === 0 || i === cpuData.length - 1) {
+                            const x = (i / (cpuData.length - 1)) * 400;
+                            const y = 250 - (v / 100) * 250;
+                            svg += `<circle cx="${x}" cy="${y}" r="4" fill="#3498db" />`;
+                            svg += `<text x="${x + 8}" y="${y - 8}" font-size="10" fill="#3498db">${v.toFixed(1)}%</text>`;
+                        }
+                    });
+                }
             }
             
             // 메모리 차트 (빨간색)
-            if (memoryData.length > 1) {
-                const memoryPoints = memoryData.map((v, i) => {
-                    const x = (i / (memoryData.length - 1)) * 300;
-                    const y = 150 - (v / 100) * 150;
-                    return `${x},${y}`;
-                }).join(' ');
-                svg += `<polyline points="${memoryPoints}" fill="none" stroke="#e74c3c" stroke-width="2" />`;
+            if (memoryData.length >= 1) {
+                if (memoryData.length === 1) {
+                    // 데이터가 1개일 때는 수평선으로 표시
+                    const y = 250 - (memoryData[0] / 100) * 250;
+                    svg += `<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="#e74c3c" stroke-width="3" />`;
+                    svg += `<circle cx="200" cy="${y}" r="4" fill="#e74c3c" />`;
+                    svg += `<text x="210" y="${y + 18}" font-size="10" fill="#e74c3c">${memoryData[0].toFixed(1)}%</text>`;
+                } else {
+                    // 여러 데이터 포인트일 때는 라인 차트
+                    const memoryPoints = memoryData.map((v, i) => {
+                        const x = (i / (memoryData.length - 1)) * 400;
+                        const y = 250 - (v / 100) * 250;
+                        return `${x},${y}`;
+                    }).join(' ');
+                    svg += `<polyline points="${memoryPoints}" fill="none" stroke="#e74c3c" stroke-width="3" />`;
+                    
+                    // 메모리 값 표시 - 데이터 포인트가 많을 때는 일부만 표시
+                    const step = Math.max(1, Math.floor(memoryData.length / 6));
+                    memoryData.forEach((v, i) => {
+                        if (i % step === 0 || i === memoryData.length - 1) {
+                            const x = (i / (memoryData.length - 1)) * 400;
+                            const y = 250 - (v / 100) * 250;
+                            svg += `<circle cx="${x}" cy="${y}" r="4" fill="#e74c3c" />`;
+                            svg += `<text x="${x + 8}" y="${y + 18}" font-size="10" fill="#e74c3c">${v.toFixed(1)}%</text>`;
+                        }
+                    });
+                }
             }
             
             svg += `</svg>`;
             chartEl.innerHTML = svg;
+            
+            // 범례를 chart-container에 직접 추가
+            const chartContainer = chartEl.parentElement;
+            if (chartContainer) {
+                // 기존 범례 제거
+                const existingLegend = chartContainer.querySelector('.chart-legend');
+                if (existingLegend) {
+                    existingLegend.remove();
+                }
+                
+                // 새 범례 추가
+                const legendHtml = `
+                    <div class="chart-legend" style="position: absolute; top: 5px; left: 10px; z-index: 10;">
+                        <span style="color: #3498db; font-weight: bold; font-size: 12px; margin-right: 15px;">CPU</span>
+                        <span style="color: #e74c3c; font-weight: bold; font-size: 12px;">Memory</span>
+                    </div>
+                `;
+                chartContainer.insertAdjacentHTML('beforeend', legendHtml);
+            }
+            
+            console.log(`Chart ${cardId} updated successfully`);
         }
 
         function setServiceOffline(service) {
@@ -229,74 +302,10 @@
             }
         }
 
-        async function fetchHostInfo() {
-            try {
-                const response = await fetch('/monitoring/host-health');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                updateHostInfo(data);
-            } catch (error) {
-                console.error('호스트 정보 가져오기 실패:', error);
-                setHostOffline();
-            }
-        }
-
-        function updateHostInfo(data) {
-            const statusEl = document.getElementById('hostStatus');
-            const cpuEl = document.getElementById('hostCpu');
-            const memoryEl = document.getElementById('hostMemory');
-            const uptimeEl = document.getElementById('hostUptime');
-
-            if (data.error) {
-                setHostOffline();
-                return;
-            }
-
-            // 상태 업데이트
-            statusEl.textContent = '정상';
-            statusEl.style.background = '#2ecc71';
-
-            // CPU 사용률
-            cpuEl.textContent = data.cpu_percent ? data.cpu_percent.toFixed(1) : '--';
-
-            // 메모리 사용률 (물리 메모리 기준)
-            const memoryPercent = data.memory?.physical_percent;
-            memoryEl.textContent = memoryPercent ? memoryPercent.toFixed(1) : '--';
-
-            // 업타임
-            uptimeEl.textContent = data.uptime || '알 수 없음';
-        }
-
-        function switchProcessTab(type) {
-            // 탭 버튼 상태 변경
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            // 프로세스 목록 다시 렌더링
-            // updateHostProcesses(window.currentHostProcesses || {}); // 호스트 프로세스 관련 코드 제거
-        }
-
-        function setHostOffline() {
-            const statusEl = document.getElementById('hostStatus');
-            const cpuEl = document.getElementById('hostCpu');
-            const memoryEl = document.getElementById('hostMemory');
-            const uptimeEl = document.getElementById('hostUptime');
-
-            statusEl.textContent = '오프라인';
-            statusEl.style.background = '#e74c3c';
-            cpuEl.textContent = '--';
-            memoryEl.textContent = '--';
-            uptimeEl.textContent = '--';
-        }
+        // 호스트 정보 관련 함수들 제거
 
         async function refreshAll() {
-            // 호스트 정보 먼저 업데이트
-            await fetchHostInfo();
+            // 호스트 정보 업데이트 제거
             
             // 서비스 정보 업데이트
             const promises = services.map(service => fetchServiceHealth(service));
