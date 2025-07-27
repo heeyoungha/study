@@ -68,16 +68,25 @@ def get_top_memory_processes(n=5):
 @router.get("/python/admin/sys-health")
 async def system_health():
     global _last_history_time
-    cpu = psutil.cpu_percent(interval=0.5)
-    mem = psutil.virtual_memory()
+    
+    # 현재 프로세스 정보 수집
+    current_process = psutil.Process()
+    
+    # CPU 사용률 (현재 프로세스 기준)
+    cpu_percent = current_process.cpu_percent(interval=0.5)
+    
+    # 메모리 정보 (현재 프로세스 기준)
+    memory_info = current_process.memory_info()
+    memory_percent = current_process.memory_percent()
+    
     uptime = datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time())
     error_blocks = get_recent_error_blocks("logs/app.log")
     top_procs, total_mem = get_top_memory_processes(5)
 
     now = datetime.datetime.now()
     data_point = {
-        "cpu_percent": cpu,
-        "memory_percent": mem.percent,
+        "cpu_percent": cpu_percent,
+        "memory_percent": memory_percent,
         "timestamp": now.isoformat()
     }
     if not _last_history_time or (now - _last_history_time).total_seconds() >= 60:
@@ -85,18 +94,22 @@ async def system_health():
         _last_history_time = now
 
     return JSONResponse({
-        "cpu_percent": cpu,
+        "cpu_percent": cpu_percent,
         "memory": {
-            "total": mem.total,
-            "used": mem.used,
-            "percent": mem.percent
+            "process_rss": memory_info.rss,  # 프로세스 메모리 사용량
+            "process_percent": memory_percent,  # 프로세스 메모리 사용률
         },
         "uptime": str(uptime),
         "recent_error_blocks": error_blocks,
         "timestamp": now.isoformat(),
         "history": list(HEALTH_HISTORY),
         "top_memory_processes": top_procs,
-        "total_memory": total_mem
+        "total_memory": total_mem,
+        "container_info": {
+            "process_id": current_process.pid,
+            "process_name": current_process.name(),
+            "is_container": True
+        }
     })
 
 @router.get("/python/admin/test-500")

@@ -11,7 +11,7 @@ Class-based views
     1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
 Including another URLconf
-    1. Import the include() function: from django.urls import include, path
+    1. Import the include() function:  from other_app.views import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from monitoring import system_health, test_500
 
 def home(request):
     return render(request, 'home.html')
@@ -29,6 +30,10 @@ urlpatterns = [
     path('store/', include('store.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # 모니터링 엔드포인트
+    path('monitoring/sys-health/', system_health, name='system_health'),
+    path('monitoring/test-500/', test_500, name='test_500'),
     
     # API 문서화
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

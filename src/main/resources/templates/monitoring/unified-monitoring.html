@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 모니터링 대시보드</title>
+    <link rel="stylesheet" href="/css/unified-monitoring.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 통합 모니터링 대시보드</h1>
+            <p>모든 서비스의 상태를 한눈에 확인하세요</p>
+        </div>
+
+        <div class="host-info" id="hostInfo">
+            <div class="host-card">
+                <div class="card-header">
+                    <h3>🖥️ 호스트 시스템</h3>
+                    <div class="status-indicator" id="hostStatus">정상</div>
+                </div>
+                <div class="card-content">
+                    <div class="metric">
+                        <span class="label">CPU 사용률:</span>
+                        <span class="value" id="hostCpu">--</span>
+                        <small class="note">(컨테이너 기준)</small>
+                    </div>
+                    <div class="metric">
+                        <span class="label">메모리 사용률:</span>
+                        <span class="value" id="hostMemory">--</span>
+                        <small class="note">(컨테이너 기준)</small>
+                    </div>
+                    <div class="metric">
+                        <span class="label">업타임:</span>
+                        <span class="value" id="hostUptime">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="refreshAll()">🔄 새로고침</button>
+            <button class="btn btn-danger" onclick="testAll500()">🧪 500 에러 테스트</button>
+            <div class="refresh-info">자동 새로고침: 30초마다</div>
+        </div>
+
+        <div class="services-grid" id="servicesGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>서비스 정보를 불러오는 중...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 팝업 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚧 준비중입니다</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeModal()">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const services = [
+            {
+                name: 'Spring Boot',
+                url: '/api/monitoring/system-health',
+                port: 8080,
+                color: '#e74c3c'
+            },
+            {
+                name: 'Python FastAPI',
+                url: '/python/admin/sys-health',
+                port: 8000,
+                color: '#3498db'
+            },
+            {
+                name: 'Django Commerce',
+                url: '/commerce/monitoring/sys-health/',
+                port: 8002,
+                color: '#2ecc71'
+            }
+        ];
+
+        let refreshInterval;
+
+        function createServiceCard(service) {
+            return `
+                <div class="service-card" id="card-${service.name.replace(/\s+/g, '-')}" onclick="openServiceMonitoring('${service.name}')">
+                    <div class="service-header">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-status status-offline" id="status-${service.name.replace(/\s+/g, '-')}">
+                            오프라인
+                        </div>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">CPU 사용률</div>
+                            <div class="metric-value" id="cpu-${service.name.replace(/\s+/g, '-')}">--</div>
+                            <div class="metric-unit">%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">메모리 사용률</div>
+                            <div class="metric-value" id="memory-${service.name.replace(/\s+/g, '-')}">--</div>
+                            <div class="metric-unit">%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart" id="chart-${service.name.replace(/\s+/g, '-')}">
+                            <div class="chart-line"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="error-logs" id="errors-${service.name.replace(/\s+/g, '-')}">
+                        <div style="text-align: center; color: #666;">에러 로그 없음</div>
+                    </div>
+                    
+                    <div class="service-footer">
+                        <div class="click-hint">클릭하여 상세 모니터링 페이지로 이동</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateServiceCard(service, data) {
+            const cardId = service.name.replace(/\s+/g, '-');
+            const statusEl = document.getElementById(`status-${cardId}`);
+            const cpuEl = document.getElementById(`cpu-${cardId}`);
+            const memoryEl = document.getElementById(`memory-${cardId}`);
+            const errorsEl = document.getElementById(`errors-${cardId}`);
+
+            // 상태 업데이트
+            statusEl.textContent = '정상';
+            statusEl.className = 'service-status status-healthy';
+
+            // 메트릭 업데이트 (프로세스 기준 우선, 없으면 시스템 기준)
+            const cpuPercent = data.cpu_percent || data.system_cpu_percent || 0;
+            const memoryPercent = data.memory?.process_percent || data.memory?.process_heap_percent || data.memory?.system_percent || 0;
+            
+            cpuEl.textContent = cpuPercent.toFixed(1);
+            memoryEl.textContent = memoryPercent.toFixed(1);
+
+            // 에러 로그 업데이트
+            if (data.recent_error_blocks && data.recent_error_blocks.length > 0) {
+                errorsEl.innerHTML = data.recent_error_blocks.map(block => 
+                    `<div class="error-log">${block}</div>`
+                ).join('');
+            } else {
+                errorsEl.innerHTML = '<div style="text-align: center; color: #666;">에러 로그 없음</div>';
+            }
+
+            // 차트 업데이트 (간단한 히스토리 표시)
+            updateChart(cardId, data.history || []);
+        }
+
+        function updateChart(cardId, history) {
+            const chartEl = document.getElementById(`chart-${cardId}`);
+            if (!history || history.length === 0) return;
+
+            const cpuData = history.map(h => h.cpu_percent || 0).filter(v => !isNaN(v));
+            const memoryData = history.map(h => h.memory_percent || 0).filter(v => !isNaN(v));
+
+            // 데이터가 없으면 차트를 표시하지 않음
+            if (cpuData.length === 0 && memoryData.length === 0) return;
+
+            // 간단한 라인 차트 생성
+            let svg = `<svg width="100%" height="100%" viewBox="0 0 300 150">`;
+            
+            // CPU 차트 (파란색)
+            if (cpuData.length > 1) {
+                const cpuPoints = cpuData.map((v, i) => {
+                    const x = (i / (cpuData.length - 1)) * 300;
+                    const y = 150 - (v / 100) * 150;
+                    return `${x},${y}`;
+                }).join(' ');
+                svg += `<polyline points="${cpuPoints}" fill="none" stroke="#3498db" stroke-width="2" />`;
+            }
+            
+            // 메모리 차트 (빨간색)
+            if (memoryData.length > 1) {
+                const memoryPoints = memoryData.map((v, i) => {
+                    const x = (i / (memoryData.length - 1)) * 300;
+                    const y = 150 - (v / 100) * 150;
+                    return `${x},${y}`;
+                }).join(' ');
+                svg += `<polyline points="${memoryPoints}" fill="none" stroke="#e74c3c" stroke-width="2" />`;
+            }
+            
+            svg += `</svg>`;
+            chartEl.innerHTML = svg;
+        }
+
+        function setServiceOffline(service) {
+            const cardId = service.name.replace(/\s+/g, '-');
+            const statusEl = document.getElementById(`status-${cardId}`);
+            const cpuEl = document.getElementById(`cpu-${cardId}`);
+            const memoryEl = document.getElementById(`memory-${cardId}`);
+
+            statusEl.textContent = '오프라인';
+            statusEl.className = 'service-status status-offline';
+            cpuEl.textContent = '--';
+            memoryEl.textContent = '--';
+        }
+
+        async function fetchServiceHealth(service) {
+            try {
+                const response = await fetch(service.url);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateServiceCard(service, data);
+                } else {
+                    setServiceOffline(service);
+                }
+            } catch (error) {
+                console.error(`Error fetching ${service.name}:`, error);
+                setServiceOffline(service);
+            }
+        }
+
+        async function fetchHostInfo() {
+            try {
+                const response = await fetch('/api/monitoring/host-health');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                updateHostInfo(data);
+            } catch (error) {
+                console.error('호스트 정보 가져오기 실패:', error);
+                setHostOffline();
+            }
+        }
+
+        function updateHostInfo(data) {
+            const statusEl = document.getElementById('hostStatus');
+            const cpuEl = document.getElementById('hostCpu');
+            const memoryEl = document.getElementById('hostMemory');
+            const uptimeEl = document.getElementById('hostUptime');
+
+            if (data.error) {
+                setHostOffline();
+                return;
+            }
+
+            // 상태 업데이트
+            statusEl.textContent = '정상';
+            statusEl.style.background = '#2ecc71';
+
+            // CPU 사용률
+            cpuEl.textContent = data.cpu_percent ? data.cpu_percent.toFixed(1) : '--';
+
+            // 메모리 사용률 (물리 메모리 기준)
+            const memoryPercent = data.memory?.physical_percent;
+            memoryEl.textContent = memoryPercent ? memoryPercent.toFixed(1) : '--';
+
+            // 업타임
+            uptimeEl.textContent = data.uptime || '알 수 없음';
+        }
+
+        function switchProcessTab(type) {
+            // 탭 버튼 상태 변경
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 프로세스 목록 다시 렌더링
+            // updateHostProcesses(window.currentHostProcesses || {}); // 호스트 프로세스 관련 코드 제거
+        }
+
+        function setHostOffline() {
+            const statusEl = document.getElementById('hostStatus');
+            const cpuEl = document.getElementById('hostCpu');
+            const memoryEl = document.getElementById('hostMemory');
+            const uptimeEl = document.getElementById('hostUptime');
+
+            statusEl.textContent = '오프라인';
+            statusEl.style.background = '#e74c3c';
+            cpuEl.textContent = '--';
+            memoryEl.textContent = '--';
+            uptimeEl.textContent = '--';
+        }
+
+        async function refreshAll() {
+            // 호스트 정보 먼저 업데이트
+            await fetchHostInfo();
+            
+            // 서비스 정보 업데이트
+            const promises = services.map(service => fetchServiceHealth(service));
+            await Promise.all(promises);
+        }
+
+        async function testAll500() {
+            const testUrls = [
+                '/api/monitoring/test-500',
+                '/python/admin/test-500',
+                '/commerce/monitoring/test-500/'
+            ];
+
+            for (const url of testUrls) {
+                try {
+                    await fetch(url);
+                } catch (error) {
+                    console.log(`500 에러 테스트 완료: ${url}`);
+                }
+            }
+
+            // 3초 후 새로고침
+            setTimeout(refreshAll, 3000);
+        }
+
+        function openServiceMonitoring(serviceName) {
+            const serviceUrls = {
+                'Spring Boot': '/admin/sys-health',
+                'Python FastAPI': '/python/check-health',
+                'Django Commerce': '/commerce/monitoring/sys-health/'
+            };
+            
+            // Spring Boot와 Django는 준비중 팝업 표시
+            if (serviceName === 'Spring Boot' || serviceName === 'Django Commerce') {
+                showModal(serviceName + ' 모니터링 페이지는 현재 개발 중입니다.\n\nJSON 데이터만 확인 가능합니다.');
+                return;
+            }
+            
+            const url = serviceUrls[serviceName];
+            if (url) {
+                // 새 탭에서 모니터링 페이지 열기
+                window.open(url, '_blank');
+            }
+        }
+
+        function showModal(message) {
+            const modal = document.getElementById('modal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        function initializeDashboard() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = services.map(service => createServiceCard(service)).join('');
+            
+            // 초기 데이터 로드
+            refreshAll();
+            
+            // 자동 새로고침 설정
+            refreshInterval = setInterval(refreshAll, 30000);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // 페이지 언로드 시 인터벌 정리
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html> 

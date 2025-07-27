@@ -1,174 +1,174 @@
-# 📌 Let'Sadam 소개
-- 주니어 개발자로서의 역량을 키우기 위해 설계한 로드맵을 구현해나가는 개인 프로젝트입니다.
-- url : https://letsadam.shop
+# 🚀 Study Project - 통합 모니터링 시스템
 
-## 📈 프로젝트 목표
-- 체계적인 로드맵 구현을 통해 주니어 개발자로서의 역량 강화
-- 클라우드 환경에서 배포 및 운영 경험 축적
-- 최신 기술 도구와 프레임워크를 활용하여 실무에 가까운 프로젝트 구축
-- 마이크로서비스 아키텍처 경험 축적
+이 프로젝트는 Spring Boot, Django, FastAPI로 구성된 마이크로서비스 아키텍처를 기반으로 한 통합 모니터링 시스템입니다.
 
-## 🛠 개발환경
+## 📊 모니터링 시스템 개요
 
-### 개발 도구
-- IntelliJ IDEA
-- VS Code
-- Docker Desktop
+### 🎯 **통합 모니터링 대시보드**
+- **URL**: `http://localhost/unified-monitoring`
+- **제공 서비스**: Java Spring Boot
+- 모든 서비스의 상태를 한눈에 확인
+- 실시간 CPU, 메모리 사용률 모니터링
+- 에러 로그 실시간 확인
+- 자동 새로고침 (30초마다)
 
-### 백엔드 기술 스택
-- **Java**: Spring Boot, Spring Security, Spring Data JPA
-- **Python**: FastAPI (비동기 API 서버)
-- **Django**: Django Commerce (전자상거래 기능)
+### 🔧 **개별 서비스 모니터링**
 
-### 프론트엔드 기술 스택
-- **HTML/CSS/JavaScript**: Bootstrap, jQuery
-- **Thymeleaf**: 서버사이드 템플릿 엔진
+#### 1. Spring Boot 모니터링
+- **URL**: `http://localhost/api/monitoring/sys-health`
+- JVM 힙 메모리, 스레드 정보
+- CPU 사용률 및 시스템 로드
+- 최근 에러 로그 블록
 
-### 데이터베이스
-- **MySQL**: 메인 데이터베이스 (AWS RDS 사용)
-- **PostgreSQL**: Python API 서버용 데이터베이스
+#### 2. Python FastAPI 모니터링
+- **URL**: `http://localhost/python/check-health`
+- 시스템 리소스 사용량
+- 프로세스별 메모리 사용량
+- 최근 에러 로그
+- 성능 히스토리
 
-### 인프라 및 배포
-- **Docker**: 다중 컨테이너 구성
-- **Docker Compose**: 개발/운영 환경 분리
-- **Nginx**: 리버스 프록시 및 정적 파일 서빙
-- **AWS**: EC2, RDS, Route 53, VPC
-
-## 🔍 핵심 기능
-
-### 🔐 인증 및 보안
-- **OAuth2 소셜 로그인**: Google 로그인 지원
-- **JWT 토큰 기반 인증**: API 보안
-- **Spring Security**: 웹 애플리케이션 보안
-
-### 📝 게시판 시스템
-- **CRUD 기능**: 게시글 작성, 수정, 삭제, 조회
-- **검색 기능**: 제목, 내용 기반 검색
-- **페이지네이션**: 효율적인 데이터 로딩
-- **댓글 시스템**: 게시글별 댓글 기능
-
-### 🗺️ 프로젝트 관리
-- **프로젝트 CRUD**: 프로젝트 생성, 수정, 삭제, 조회
-- **프로젝트 검색**: 제목, 설명 기반 검색
-- **프로젝트 상세 정보**: 프로젝트별 상세 페이지
-
-### ☕ 카페 추천 시스템
-- **카카오 API 연동**: 주소 검색 및 좌표 변환
-- **주변 카페 검색**: 사용자 위치 기반 카페 추천
-- **카페 상세 정보**: 카페 정보 및 위치 표시
-
-### 🛒 전자상거래 (Django Commerce)
-- **상품 관리**: 상품 등록, 수정, 삭제
-- **장바구니**: 상품 담기 및 주문(예정)
-- **결제 시스템**: 결제 프로세스 구현(예정)
-
-### 📊 일기 및 독서모임 (Python API)
-- **일기 작성**: 개인 일기 작성 및 관리
-- **감정 분석**: GPT를 활용한 감정 분석
-- **독서모임**: 독서 기록 및 관리
-- **프로젝트 추천**: AI 기반 프로젝트 추천
+#### 3. Django Commerce 모니터링
+- **URL**: `http://localhost/commerce/monitoring/sys-health/`
+- Django 애플리케이션 상태
+- 데이터베이스 연결 상태
+- 캐시 상태 확인
+- Store 앱 및 Admin 앱 상태
+- Django 설정 정보
 
 ## 🏗️ 아키텍처
 
-### 마이크로서비스 구성
 ```
-├── Java Spring Boot (메인 애플리케이션)
-├── Python FastAPI (일기/독서모임 API)
-├── Django Commerce (전자상거래)
-├── MySQL (메인 DB)
-├── PostgreSQL (Python API DB)
-└── Nginx (리버스 프록시)
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Spring Boot   │    │  Python FastAPI │    │  Django Commerce│
+│   (Port: 8080)  │    │   (Port: 8000)  │    │   (Port: 8002)  │
+│  [통합 대시보드] │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   Nginx Proxy   │
+                    │   (Port: 80)    │
+                    └─────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │  MySQL Database │
+                    │   (Port: 3306)  │
+                    └─────────────────┘
 ```
 
-### Docker 구성
-- **개발 환경**: `docker-compose-dev.yml`
-- **운영 환경**: `docker-compose-prod.yml`
-- **다중 컨테이너**: 애플리케이션, 데이터베이스, 웹서버 분리
+## 🚀 시작하기
 
-## 🚀 배포 및 운영
-
-### AWS 인프라
-- **VPC**: 네트워크 서브넷 및 보안 그룹 설정(예정)
-- **EC2**: Docker Compose를 활용한 애플리케이션 배포
-- **RDS**: MySQL 데이터베이스 연결(예정)
-- **Route 53**: 커스텀 도메인 및 HTTPS 설정
-
-### CI/CD 파이프라인
-- **GitHub Actions**: 자동 빌드 및 배포
-- **Docker 이미지 빌드**: 자동화된 컨테이너 빌드
-- **배포 스크립트**: `deploy.sh`를 통한 원클릭 배포
-
-## 📊 데이터베이스 설계
-
-### ERD
-<img width="793" alt="erd" src="https://github.com/user-attachments/assets/a0a4c11a-c502-4fe8-9973-606f0e9aa181">
-
-### AWS 아키텍처
-<img width="945" alt="aws아키" src="https://github.com/user-attachments/assets/44774cb0-678a-4600-a92c-1ca4935d1901">
-
-## 📋 커밋 컨벤션
-- **feat**: 새로운 기능 추가
-- **fix**: 버그 수정
-- **docs**: 문서 변경
-- **style**: 코드 스타일 변경 (기능에 영향을 주지 않음)
-- **refactor**: 코드 리팩토링 (기능 변화는 없고, 코드 개선)
-- **chore**: 그 외 잡다한 작업 (빌드 도구, 패키지 관리자, 라이브러리 업데이트 등)
-- **ci**: CI 설정 파일 수정
-- **build**: 빌드 관련 파일 수정
-
-## 🖼️ 프로젝트 스크린샷
-
-<details>
-<summary><b> ✅ 프로젝트 소개 펼치기</b></summary>
-<div markdown="1">
-  
-### 🧷 랜딩 페이지
-<img width="945" alt="111" src="https://github.com/user-attachments/assets/3b991d03-9ad9-4970-9f23-f488cd5d43df">
-  
-### 🧷 게시판 - 조회
-<img width="945" alt="444" src="https://github.com/user-attachments/assets/623fbfca-81ee-4797-9b61-9b8d1c01ca06">
-  
-### 🧷 게시판 - 검색
-<img width="945" alt="333" src="https://github.com/user-attachments/assets/f0387ce9-6d40-4a0e-957b-f6f70b78244a">
-
-### 🧷 프로젝트 - 조회
-<img width="945" alt="666" src="https://github.com/user-attachments/assets/668e00dc-676f-4780-9579-de4e559b9d16">  
-  
-### 🧷 프로젝트 - 검색
-<img width="945" alt="555" src="https://github.com/user-attachments/assets/73809585-fdff-4046-9e39-383b6ced0923">
-
-### 🧷 카페 찾기 검색  
-<img width="945" alt="777" src="https://github.com/user-attachments/assets/828240d9-0a43-409a-9bfb-1993a9a7ffe7">
-
-### 🧷 카페 찾기 검색결과 
-<img width="945" alt="888" src="https://github.com/user-attachments/assets/3eca821d-d67f-463b-9a54-97f5144f17a2">
-
-</div>
-</details>
-
-## 🔧 로컬 개발 환경 설정
-
-### 필수 요구사항
-- Docker & Docker Compose
-- Java 11+
-- Python 3.8+
-- Node.js 14+
-
-### 실행 방법
+### 1. 환경 설정
 ```bash
-# 1. 프로젝트 클론
-git clone [repository-url]
+# 프로젝트 클론
+git clone <repository-url>
 cd study
 
-# 2. 개발 환경 실행
-docker-compose -f docker-compose-dev.yml up -d
-
-# 3. 애플리케이션 접속
-# 메인 애플리케이션: http://localhost:8080
-# Python API: http://localhost:8000
-# Django Commerce: http://localhost:8001
+# 환경 변수 설정
+cp .env.example .env
+# .env 파일을 편집하여 필요한 환경 변수 설정
 ```
 
----
+### 2. Docker Compose로 실행
+```bash
+# 모든 서비스 시작
+docker-compose up -d
 
-**Let'Sadam** - 주니어 개발자의 성장 여정을 담은 프로젝트입니다. 🚀
+# 로그 확인
+docker-compose logs -f
+
+# 특정 서비스 로그 확인
+docker-compose logs -f app          # Spring Boot
+docker-compose logs -f python-api   # FastAPI
+docker-compose logs -f django-commerce # Django
+```
+
+### 3. 모니터링 접근
+- **통합 대시보드**: http://localhost/unified-monitoring
+- **Spring Boot**: http://localhost/admin/sys-health
+- **FastAPI**: http://localhost/python/admin/sys-health
+- **Django**: http://localhost/commerce/admin/sys-health/
+
+## 📈 모니터링 기능
+
+### 🔍 **실시간 모니터링**
+- CPU 사용률 (실시간)
+- 메모리 사용률 (실시간)
+- 시스템 업타임
+- 에러 로그 분석
+
+### 📊 **히스토리 추적**
+- 최근 30개 데이터 포인트 저장
+- 1분마다 자동 업데이트
+- 그래프 형태로 시각화
+
+### 🚨 **에러 감지**
+- 최근 30분 에러 로그 블록 분석
+- 실시간 에러 알림
+- 에러 패턴 분석
+
+### 🧪 **테스트 기능**
+- 500 에러 테스트 엔드포인트
+- 서비스별 개별 테스트
+- 통합 테스트 기능
+
+## 🔧 기술 스택
+
+### Backend Services
+- **Spring Boot**: Java 기반 메인 애플리케이션 (통합 모니터링 대시보드 제공)
+- **FastAPI**: Python 기반 API 서버
+- **Django**: Python 기반 웹 애플리케이션
+
+### Infrastructure
+- **Docker**: 컨테이너화
+- **Nginx**: 리버스 프록시
+- **MySQL**: 데이터베이스
+
+### Monitoring
+- **Custom Health Checks**: 각 서비스별 커스텀 헬스체크
+- **Real-time Metrics**: 실시간 메트릭 수집
+- **Error Logging**: 에러 로그 분석
+- **Unified Dashboard**: 통합 모니터링 대시보드 (Spring Boot에서 제공)
+
+## 📁 프로젝트 구조
+
+```
+study/
+├── src/                    # Spring Boot 소스 (통합 모니터링 포함)
+├── python-api/            # FastAPI 서비스
+├── django-commerce/       # Django 서비스
+├── nginx/                # Nginx 설정
+├── database/             # MySQL 설정
+├── logs/                 # 로그 파일들
+└── docker-compose.yml    # Docker Compose 설정
+```
+
+## 🛠️ 개발 가이드
+
+### 새로운 서비스 추가
+1. 서비스별 모니터링 엔드포인트 구현
+2. 통합 대시보드에 서비스 추가 (Spring Boot의 AdminHealthController.java 수정)
+3. nginx 설정 업데이트
+4. docker-compose.yml에 서비스 추가
+
+### 모니터링 확장
+1. 추가 메트릭 수집
+2. 알림 시스템 구현
+3. 대시보드 커스터마이징
+4. 로그 분석 강화
+
+### 📝 API 문서
+
+#### 헬스체크 엔드포인트
+- **Spring Boot**: `GET /admin/sys-health`
+- **Python FastAPI**: `GET /python/admin/sys-health` (JSON), `GET /python/check-health` (HTML)
+- **Django Commerce**: `GET /commerce/monitoring/sys-health/`
+
+#### 테스트 엔드포인트 (500 에러 시뮬레이션)
+- **Spring Boot**: `GET /admin/test-500`
+- **Python FastAPI**: `GET /python/admin/test-500`
+- **Django Commerce**: `GET /commerce/monitoring/test-500/`
+
+### Monitoring Dashboard
+- `GET /unified-monitoring`
