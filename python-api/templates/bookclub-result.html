@@ -1,4 +1,4 @@
-{% include 'fragment/nav.html' %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +7,7 @@
 </head>
 <body>
 <div class="container">
+    {% include 'fragment/nav.html' %}
     <h1>독서모임 상세</h1>
     {% if error %}
         <div style="color:red;">{{ error }}</div>
@@ -23,7 +24,16 @@
                     <h3>💡 추천 프로젝트/액션</h3>
                     <ul>
                         {% for project in entry.recommended_projects %}
-                            <li>{{ project }}</li>
+                            <li>
+                                <div class="project-item">
+                                    <span class="project-text">{{ project }}</span>
+                                    <a href="/project/create?title={{ project|urlencode }}" 
+                                       class="create-project-btn" 
+                                       target="_blank">
+                                        프로젝트 생성하기
+                                    </a>
+                                </div>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
