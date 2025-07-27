@@ -78,7 +78,7 @@ public class SecurityConfig {
             // 정적 리소스 및 로그인 페이지에 대한 접근 허용 규칙
             http
                     .authorizeHttpRequests((auth) -> auth
-                            .requestMatchers("/check-proto", "/", "/login", "/css/**", "/js/**", "/images/**", "/oauth2/**", "/debug-all","/project/**").permitAll()  // 모든 허용 경로를 한번에 설정
+                            .requestMatchers("/check-proto", "/", "/login", "/css/**", "/js/**", "/images/**", "/oauth2/**", "/debug-all").permitAll()  // 모든 허용 경로를 한번에 설정
                             .anyRequest().authenticated()
                             );  // 그 외 모든 요청은 인증 필요
 
