@@ -1,174 +1,181 @@
-# 🚀 Study Project - 통합 모니터링 시스템
+# 📌 Let'Sadam 소개
+-  주니어 개발자로서의 역량을 키우기 위해 설계한 로드맵을 구현해나가는 개인 프로젝트입니다.
+-  url : https://letsadam.shop
 
-이 프로젝트는 Spring Boot, Django, FastAPI로 구성된 마이크로서비스 아키텍처를 기반으로 한 통합 모니터링 시스템입니다.
+## 📈 프로젝트 목표
+- 체계적인 로드맵 구현을 통해 주니어 개발자로서의 역량 강화
+- 클라우드 환경에서 배포 및 운영 경험 축적
+- 최신 기술 도구와 프레임워크를 활용하여 실무에 가까운 프로젝트 구축
 
-## 📊 모니터링 시스템 개요
+## 🛠 개발환경
 
-### 🎯 **통합 모니터링 대시보드**
-- **URL**: `http://localhost/unified-monitoring`
-- **제공 서비스**: Java Spring Boot
-- 모든 서비스의 상태를 한눈에 확인
-- 실시간 CPU, 메모리 사용률 모니터링
-- 에러 로그 실시간 확인
-- 자동 새로고침 (30초마다)
+### protocol Tool
+- Visual Studio COde
+- 인텔리J IDE
 
-### 🔧 **개별 서비스 모니터링**
+### 개발언어/framework
+- **Backend**: JAVA, Spring/Spring Boot/Spring Security, JPA
+- **Frontend**: JQuery, Bootstrap, Thymeleaf
+- **Python API**: FastAPI, SQLAlchemy, Alembic
+- **Django Commerce**: Django, Django REST Framework
 
-#### 1. Spring Boot 모니터링
-- **URL**: `http://localhost/api/monitoring/sys-health`
-- JVM 힙 메모리, 스레드 정보
-- CPU 사용률 및 시스템 로드
-- 최근 에러 로그 블록
+### 데이터베이스
+- MySQL 
 
-#### 2. Python FastAPI 모니터링
-- **URL**: `http://localhost/python/check-health`
-- 시스템 리소스 사용량
-- 프로세스별 메모리 사용량
-- 최근 에러 로그
-- 성능 히스토리
+### 서버 환경 및 배포 도구
+- **Container**: Docker (다중 컨테이너 구성)
+- **Web Server**: Nginx (리버스 프록시)
+- **OS**: Linux
+- **AWS 구성 요소**:
+    - VPC: 네트워크 환경 설정 (예정)
+    - EC2: 애플리케이션 서버
+    - RDS: MySQL 데이터베이스 (예정)
+    - Route 53: 도메인 관리 및 라우팅 설정
+    - SSL: Let's Encrypt 인증서
 
-#### 3. Django Commerce 모니터링
-- **URL**: `http://localhost/commerce/monitoring/sys-health/`
-- Django 애플리케이션 상태
-- 데이터베이스 연결 상태
-- 캐시 상태 확인
-- Store 앱 및 Admin 앱 상태
-- Django 설정 정보
+## 🔍 핵심 기능
 
-## 🏗️ 아키텍처
+### 0️⃣ 소셜 로그인
+- OAuth2를 활용한 구글 소셜 로그인 기능
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Spring Boot   │    │  Python FastAPI │    │  Django Commerce│
-│   (Port: 8080)  │    │   (Port: 8000)  │    │   (Port: 8002)  │
-│  [통합 대시보드] │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   Nginx Proxy   │
-                    │   (Port: 80)    │
-                    └─────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │  MySQL Database │
-                    │   (Port: 3306)  │
-                    └─────────────────┘
-```
+### 1️⃣ 게시판 CRUD
+- 기본 게시판 기능 (글 작성, 수정, 삭제, 조회)
+    - 게시글 검색하기 기능
+    - 페이지네이션 기능
 
-## 🚀 시작하기
+### 2️⃣ 외부 API 호출
+- 카카오 주소 API를 사용하여 외부 데이터와 연동
+- 카카오 장소 검색 API를 활용한 카페 추천 시스템
 
-### 1. 환경 설정
-```bash
-# 프로젝트 클론
-git clone <repository-url>
-cd study
+### 3️⃣ 일기/북클럽 시스템 (Python FastAPI)
+- **일기 기능**: 
+  - 일기 작성, 조회, 수정, 삭제
+  - GPT를 활용한 일기 요약 및 감정 분석
+  - 일기 목록 조회 및 검색
+- **북클럽 기능**:
+  - 독서 기록 작성 및 관리
+  - GPT를 활용한 독서 요약 및 분석
+  - 북클럽 참여자 관리
 
-# 환경 변수 설정
-cp .env.example .env
-# .env 파일을 편집하여 필요한 환경 변수 설정
-```
+### 4️⃣ Django Commerce (전자상거래)
+- **상품 관리**: 상품 등록, 수정, 삭제
+- **장바구니**: 상품 추가, 수량 변경, 삭제
+- **주문 시스템**: 주문 생성, 결제 처리
+- **관리자 기능**: 주문 관리, 재고 관리
 
-### 2. Docker Compose로 실행
-```bash
-# 모든 서비스 시작
-docker-compose up -d
-
-# 로그 확인
-docker-compose logs -f
-
-# 특정 서비스 로그 확인
-docker-compose logs -f app          # Spring Boot
-docker-compose logs -f python-api   # FastAPI
-docker-compose logs -f django-commerce # Django
-```
-
-### 3. 모니터링 접근
-- **통합 대시보드**: http://localhost/unified-monitoring
-- **Spring Boot**: http://localhost/admin/sys-health
-- **FastAPI**: http://localhost/python/admin/sys-health
-- **Django**: http://localhost/commerce/admin/sys-health/
-
-## 📈 모니터링 기능
-
-### 🔍 **실시간 모니터링**
-- CPU 사용률 (실시간)
-- 메모리 사용률 (실시간)
-- 시스템 업타임
-- 에러 로그 분석
-
-### 📊 **히스토리 추적**
-- 최근 30개 데이터 포인트 저장
-- 1분마다 자동 업데이트
-- 그래프 형태로 시각화
-
-### 🚨 **에러 감지**
-- 최근 30분 에러 로그 블록 분석
-- 실시간 에러 알림
-- 에러 패턴 분석
-
-### 🧪 **테스트 기능**
-- 500 에러 테스트 엔드포인트
-- 서비스별 개별 테스트
-- 통합 테스트 기능
-
-## 🔧 기술 스택
-
-### Backend Services
-- **Spring Boot**: Java 기반 메인 애플리케이션 (통합 모니터링 대시보드 제공)
-- **FastAPI**: Python 기반 API 서버
-- **Django**: Python 기반 웹 애플리케이션
-
-### Infrastructure
-- **Docker**: 컨테이너화
-- **Nginx**: 리버스 프록시
+### 5️⃣ Docker 다중 컨테이너 구현
+- **Spring Boot**: 메인 애플리케이션
+- **Python FastAPI**: 일기/북클럽 API
+- **Django**: 전자상거래 시스템
 - **MySQL**: 데이터베이스
+- **Nginx**: 리버스 프록시 및 정적 파일 서빙
 
-### Monitoring
-- **Custom Health Checks**: 각 서비스별 커스텀 헬스체크
-- **Real-time Metrics**: 실시간 메트릭 수집
-- **Error Logging**: 에러 로그 분석
-- **Unified Dashboard**: 통합 모니터링 대시보드 (Spring Boot에서 제공)
+### 6️⃣ AWS 기반 배포
+- **VPC**: 네트워크 서브넷 및 보안 그룹 설정
+- **EC2**: Docker Compose를 활용한 애플리케이션 배포
+- **RDS**: MySQL 데이터베이스 연결
+- **Route 53**: 커스텀 도메인 및 HTTPS 설정
+- **SSL**: Let's Encrypt 자동 인증서 갱신
 
-## 📁 프로젝트 구조
+### 7️⃣ CI/CD 자동화
+- GitHub Actions를 사용한 빌드 및 배포 자동화
+- Docker 이미지 빌드 및 태그 관리
+- 자동 테스트 및 배포 파이프라인
+
+### 8️⃣ 데이터 영속성
+- Docker 볼륨을 활용한 데이터베이스 데이터 보존
+- 컨테이너 재시작 시에도 데이터 유지
+- 로그 파일 및 업로드 파일 보존
+
+## 🏗️ 프로젝트 구조
 
 ```
 study/
-├── src/                    # Spring Boot 소스 (통합 모니터링 포함)
-├── python-api/            # FastAPI 서비스
-├── django-commerce/       # Django 서비스
-├── nginx/                # Nginx 설정
-├── database/             # MySQL 설정
-├── logs/                 # 로그 파일들
-└── docker-compose.yml    # Docker Compose 설정
+├── src/main/java/com/example/study/     # Spring Boot 애플리케이션
+├── python-api/                          # Python FastAPI (일기/북클럽)
+│   ├── routes/                          # API 라우트
+│   ├── models.py                        # 데이터베이스 모델
+│   └── templates/                       # HTML 템플릿
+├── django-commerce/                      # Django Commerce
+│   ├── store/                           # 상점 앱
+│   └── templates/                       # HTML 템플릿
+├── nginx/                               # Nginx 설정
+├── database/                            # MySQL 설정
+└── docker-compose-*.yml                 # Docker Compose 설정
 ```
 
-## 🛠️ 개발 가이드
+<!-- ## 🗞️ ERD & AWS 아키텍처
+- ERD
 
-### 새로운 서비스 추가
-1. 서비스별 모니터링 엔드포인트 구현
-2. 통합 대시보드에 서비스 추가 (Spring Boot의 AdminHealthController.java 수정)
-3. nginx 설정 업데이트
-4. docker-compose.yml에 서비스 추가
+<img width="793" alt="erd" src="https://github.com/user-attachments/assets/a0a4c11a-c502-4fe8-9973-606f0e9aa181">
 
-### 모니터링 확장
-1. 추가 메트릭 수집
-2. 알림 시스템 구현
-3. 대시보드 커스터마이징
-4. 로그 분석 강화
+- AWS 아키텍처
 
-### 📝 API 문서
+<img width="945" alt="aws아키" src="https://github.com/user-attachments/assets/44774cb0-678a-4600-a92c-1ca4935d1901"> -->
 
-#### 헬스체크 엔드포인트
-- **Spring Boot**: `GET /admin/sys-health`
-- **Python FastAPI**: `GET /python/admin/sys-health` (JSON), `GET /python/check-health` (HTML)
-- **Django Commerce**: `GET /commerce/monitoring/sys-health/`
+## ETC
 
-#### 테스트 엔드포인트 (500 에러 시뮬레이션)
-- **Spring Boot**: `GET /admin/test-500`
-- **Python FastAPI**: `GET /python/admin/test-500`
-- **Django Commerce**: `GET /commerce/monitoring/test-500/`
+- 커밋 컨벤션
+    - feat: 새로운 기능 추가
+    - fix: 버그 수정
+    - docs: 문서 변경
+    - style: 코드 스타일 변경 (기능에 영향을 주지 않음)
+    - refactor: 코드 리팩토링 (기능 변화는 없고, 코드 개선)
+    - chore: 그 외 잡다한 작업 (빌드 도구, 패키지 관리자, 라이브러리 업데이트 등)
+    - ci: CI 설정 파일 수정
+    - build: 빌드 관련 파일 수정
 
-### Monitoring Dashboard
-- `GET /unified-monitoring`
+<br>
+<!-- 
+<details>
+<summary><b> ✅ 프로젝트 소개 펼치기</b></summary>
+<div markdown="1">
+  🧷 랜딩 페이지
+
+<img width="945" alt="111" src="https://github.com/user-attachments/assets/3b991d03-9ad9-4970-9f23-f488cd5d43df">
+
+🧷 게시판 - 조회
+
+<img width="945" alt="444" src="https://github.com/user-attachments/assets/623fbfca-81ee-4797-9b61-9b8d1c01ca06">
+
+🧷 게시판 - 검색
+
+<img width="945" alt="333" src="https://github.com/user-attachments/assets/f0387ce9-6d40-4a0e-957b-f6f70b78244a">
+
+🧷 프로젝트 - 조회
+
+<img width="945" alt="666" src="https://github.com/user-attachments/assets/668e00dc-676f-4780-9579-de4e559b9d16">  
+
+🧷 프로젝트 - 검색
+
+<img width="945" alt="555" src="https://github.com/user-attachments/assets/73809585-fdff-4046-9e39-383b6ced0923">
+
+🧷 카페 찾기 검색
+
+<img width="945" alt="777" src="https://github.com/user-attachments/assets/828240d9-0a43-409a-9bfb-1993a9a7ffe7">
+
+🧷 카페 찾기 검색결과
+
+<img width="945" alt="888" src="https://github.com/user-attachments/assets/3eca821d-d67f-463b-9a54-97f5144f17a2">
+
+🧷 일기 작성 페이지
+
+<img width="945" alt="diary-form" src="https://github.com/user-attachments/assets/diary-form-screenshot">
+
+🧷 일기 목록 페이지
+
+<img width="945" alt="diary-list" src="https://github.com/user-attachments/assets/diary-list-screenshot">
+
+🧷 북클럽 기록 작성
+
+<img width="945" alt="bookclub-form" src="https://github.com/user-attachments/assets/bookclub-form-screenshot">
+
+🧷 Django Commerce 상품 목록
+
+<img width="945" alt="commerce-products" src="https://github.com/user-attachments/assets/commerce-products-screenshot">
+
+
+
+
+</div>
+</details> -->
