@@ -49,3 +49,5 @@ study.pem__pycache__/
 *.pyd
 
 study.pem
+/django-commerce/staticfiles/
+*.log
