@@ -9,7 +9,9 @@ public class ProjectResponse {
 
     private Long id;
     private String title;
-    private String startDate;
+    private String timeZone;
+    private String targetMonths;
+    private String quarters;
     private String userName;
     private String status;
     private String place;
@@ -18,7 +20,9 @@ public class ProjectResponse {
 
         this.id = project.getId();
         this.title = project.getTitle();
-        this.startDate = project.getStartDate();
+        this.timeZone = project.getTimeZone();
+        this.targetMonths = project.getTargetMonths();
+        this.quarters = project.getQuarters();
         this.status = project.getStatus();
         this.place = project.getPlace();
     }

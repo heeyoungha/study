@@ -8,62 +8,111 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="formTitle">🏄🏻 새 프로젝트 생성</h1>
+    <div class="form-header">
+      <h1 id="formTitle">🚀 새 프로젝트 생성</h1>
+      <p class="form-description">새로운 프로젝트를 시작해보세요! 목표를 설정하고 진행 상황을 관리할 수 있습니다.</p>
+    </div>
     
-    <form id="projectForm">
+    <form id="projectForm" class="enhanced-form" action="/project/create" method="post">
       <input type="hidden" id="projectId" name="projectId">
+      <input type="hidden" id="targetMonthsInput" name="targetMonths">
       
-      <div class="form-group">
-        <label for="title">프로젝트 제목</label>
-        <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                placeholder="프로젝트 제목을 입력하세요"
-        >
+      <div class="form-section">
+        <div class="form-group">
+          <label for="title">
+            <span class="label-icon">📝</span>
+            프로젝트 제목
+          </label>
+          <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  placeholder="프로젝트 제목을 입력하세요"
+                  class="enhanced-input"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="timeZone">
+            <span class="label-icon">🕐</span>
+            시간대
+          </label>
+          <input
+                  type="text"
+                  id="timeZone"
+                  name="timeZone"
+                  required
+                  placeholder="예: 오전, 오후, 저녁, 새벽"
+                  class="enhanced-input"
+          >
+        </div>
       </div>
       
-      <div class="form-group">
-        <label for="startDate">시작 날짜</label>
-        <input
-                type="date"
-                id="startDate"
-                name="startDate"
-                required
-        >
+      <div class="form-section">
+        <div class="form-group">
+          <label for="place">
+            <span class="label-icon">📍</span>
+            장소
+          </label>
+          <input
+                  type="text"
+                  id="place"
+                  name="place"
+                  required
+                  placeholder="프로젝트 장소를 입력하세요"
+                  class="enhanced-input"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="status">
+            <span class="label-icon">📊</span>
+            상태
+          </label>
+          <select
+                  id="status"
+                  name="status"
+                  required
+                  class="enhanced-select"
+          >
+            <option value="">상태를 선택하세요</option>
+            <option value="TO_DO">시작전</option>
+            <option value="IN_PROGRESS">진행중</option>
+            <option value="ON_HOLD">보류</option>
+            <option value="DONE">완료</option>
+          </select>
+        </div>
       </div>
       
-      <div class="form-group">
-        <label for="place">장소</label>
-        <input
-                type="text"
-                id="place"
-                name="place"
-                required
-                placeholder="프로젝트 장소를 입력하세요"
-        >
+      <div class="form-section">
+        <div class="form-group full-width">
+          <label for="monthGrid">
+            <span class="label-icon">🎯</span>
+            목표 월
+          </label>
+          <div class="month-selector-container">
+            <div class="month-grid" id="monthGrid"></div>
+            <div class="selected-months">
+              <span class="selected-label">선택된 월:</span>
+              <div class="tag-list" id="tagList"></div>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div class="form-group">
-        <label for="status">상태</label>
-        <select
-                id="status"
-                name="status"
-                required
-        >
-          <option value="">상태를 선택하세요</option>
-          <option value="IN_PROGRESS">진행중</option>
-          <option value="DONE">완료</option>
-          <option value="ON_HOLD">보류</option>
-          <option value="TO_DO">시작전</option>
-        </select>
+      <div class="form-actions">
+        <button type="submit" id="submitButton" class="enhanced-button">
+          <span class="button-icon">🚀</span>
+          프로젝트 생성
+        </button>
+        <button type="button" id="cancelButton" class="enhanced-button secondary" style="display: none;" onclick="window.location.href='/project'">
+          <span class="button-icon">❌</span>
+          취소
+        </button>
       </div>
-      
-      <button type="submit" id="submitButton">프로젝트 생성</button>
-      <button type="button" id="cancelButton" style="display: none; margin-top: 10px;" onclick="window.location.href='/project'">취소</button>
     </form>
-    
+
     <div class="nav-links">
       <a href="/project">📋 프로젝트 목록</a>
       <a href="/diary">📝 일기 작성</a>
@@ -73,19 +122,106 @@
 
 <script>
   var projectId = null;
+  // 태그 관련 변수
+  let tags = [];
+  
   // 페이지 로드 시 수정 모드 체크
   window.onload = function() {
     projectId = getQueryParam('id');
     console.log(projectId);
     if (projectId) {
       setEditMode(projectId);
+    } else {
+      // URL에서 title 파라미터 확인
+      const titleParam = getQueryParam('title');
+      if (titleParam) {
+        document.getElementById('title').value = decodeURIComponent(titleParam);
+      }
     }
+    
+    // 월 선택기 설정
+    setupMonthSelector();
   };
 
   // URL에서 쿼리 파라미터를 가져오는 함수
   function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
+  }
+  
+  // 월 선택 설정
+  function setupMonthSelector() {
+    const monthGrid = document.getElementById('monthGrid');
+    const months = [
+      '1월', '2월', '3월', '4월', '5월', '6월',
+      '7월', '8월', '9월', '10월', '11월', '12월'
+    ];
+    
+    months.forEach(month => {
+      const monthButton = document.createElement('button');
+      monthButton.type = 'button';
+      monthButton.className = 'month-button';
+      monthButton.textContent = month;
+      monthButton.onclick = () => toggleMonth(month);
+      monthGrid.appendChild(monthButton);
+    });
+  }
+  
+  // 월 토글
+  function toggleMonth(month) {
+    const monthButton = event.target;
+    if (tags.includes(month)) {
+      // 월 제거
+      tags = tags.filter(tag => tag !== month);
+      monthButton.classList.remove('selected');
+    } else {
+      // 월 추가
+      tags.push(month);
+      monthButton.classList.add('selected');
+    }
+    renderTags();
+  }
+  
+  // 태그 제거
+  function removeTag(tagText) {
+    tags = tags.filter(tag => tag !== tagText);
+    // 월 버튼에서도 선택 해제
+    const monthButtons = document.querySelectorAll('.month-button');
+    monthButtons.forEach(button => {
+      if (button.textContent === tagText) {
+        button.classList.remove('selected');
+      }
+    });
+    renderTags();
+  }
+  
+  // 태그 렌더링
+  function renderTags() {
+    const tagList = document.getElementById('tagList');
+    tagList.innerHTML = '';
+    
+    // 태그를 월 순서로 정렬
+    const sortedTags = tags.sort((a, b) => {
+      const monthA = parseInt(a.replace('월', ''));
+      const monthB = parseInt(b.replace('월', ''));
+      return monthA - monthB;
+    });
+    
+    sortedTags.forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.className = 'tag';
+      tagElement.onclick = () => sortTags(); // 태그 클릭 시 정렬
+      tagElement.innerHTML = `
+        ${tag}
+        <span class="tag-remove" onclick="removeTag('${tag}')">&times;</span>
+      `;
+      tagList.appendChild(tagElement);
+    });
+  }
+  
+  // 태그 정렬 함수
+  function sortTags() {
+    renderTags(); // 이미 정렬된 상태로 렌더링
   }
 
   // 프로젝트 수정 모드 설정
@@ -111,34 +247,8 @@
 
   // 폼 제출 처리
   document.getElementById('projectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = {
-      title: document.getElementById('title').value,
-      startDate: document.getElementById('startDate').value,
-      status: document.getElementById('status').value,
-      place: document.getElementById('place').value,
-    };
-
-    const url = projectId ? `/api/project/${projectId}` : '/api/project';
-    const method = projectId ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData)
-    })
-      .then(response => {
-        if (!response.ok) throw new Error('서버 오류가 발생했습니다.');
-        alert(projectId ? '프로젝트가 성공적으로 수정되었습니다.' : '프로젝트가 성공적으로 생성되었습니다.');
-        window.location.href = '/project';
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('오류가 발생했습니다.');
-      });
+    // targetMonths를 hidden input에 설정
+    document.getElementById('targetMonthsInput').value = tags.join(',');
   });
 </script>
 </body>

@@ -4,6 +4,7 @@ import com.example.study.project.dto.ProjectRequest;
 import com.example.study.project.dto.ProjectResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/project")
@@ -46,6 +49,34 @@ public class ProjectWebController {
     @GetMapping("/create")
     public String createProject() {
         return "project/project-form";
+    }
+
+    @PostMapping("/create")
+    public String createProject(@ModelAttribute ProjectRequest.CreateProjectRequest request) {
+        projectService.saveProject(request);
+        return "redirect:/project";
+    }
+
+    @GetMapping("/api/project")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getProjects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) String quarterFilter,
+            @RequestParam(required = false) String statusFilter) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<ProjectResponse> projectPage = projectService.readProjectListWithFilters(
+            searchKeyword, quarterFilter, statusFilter, pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", projectPage.getContent());
+        response.put("last", projectPage.isLast());
+        response.put("totalElements", projectPage.getTotalElements());
+        response.put("totalPages", projectPage.getTotalPages());
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

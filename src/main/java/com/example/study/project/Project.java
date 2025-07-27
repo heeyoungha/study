@@ -17,8 +17,9 @@ public class Project extends BaseEntity {
 
     private String title;
 
-    private String startDate;
-
+    private String timeZone;
+    private String targetMonths;
+    private String quarters;
     private String place;
     private String status;
 
@@ -26,18 +27,22 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "project_user_id")
     private ProjectUser projectUser;
 
-    public static Project of(String title, String startDate, String place, String status){
+    public static Project of(String title, String timeZone, String targetMonths, String quarters, String place, String status){
         Project project = new Project();
         project.title = title;
-        project.startDate = startDate;
+        project.timeZone = timeZone;
+        project.targetMonths = targetMonths;
+        project.quarters = quarters;
         project.place = place;
         project.status = status;
         return project;
     }
 
-    public void updateProject(String title, String startDate){
+    public void updateProject(String title, String timeZone, String targetMonths, String quarters){
         this.title = title;
-        this.startDate = startDate;
+        this.timeZone = timeZone;
+        this.targetMonths = targetMonths;
+        this.quarters = quarters;
     }
 
 }

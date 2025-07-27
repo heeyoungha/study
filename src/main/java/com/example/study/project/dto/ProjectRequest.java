@@ -8,7 +8,9 @@ public class ProjectRequest {
     public static class CreateProjectRequest{
 
         private String title;
-        private String startDate;
+        private String timeZone;
+        private String targetMonths;
+        private String quarters;
         private String status;
         private String place;
         private Long userId;
@@ -18,7 +20,9 @@ public class ProjectRequest {
     @Data
     public static class UpdateProjectRequest{
         private String title;
-        private String startDate;
+        private String timeZone;
+        private String targetMonths;
+        private String quarters;
         private String status;
         private String place;
     }

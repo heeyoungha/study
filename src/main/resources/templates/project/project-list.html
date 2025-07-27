@@ -14,60 +14,59 @@
     <div th:replace="~{fragment/nav :: navigation}"></div>
 
     <h1>🏄🏻 프로젝트 관리</h1>
-  
-      <!-- 테이블 컨테이너 -->
-      <div id="table-container" style="display: none;">
-        <table>
+
+    <!-- 테이블 컨테이너 -->
+    <div id="table-container">
+              <table>
           <thead>
             <tr>
-              <th>시작일자</th>
-              <th>프로젝트</th>
-              <th>장소</th>
-              <th>상태</th>
+              <th class="filter-header" data-filter="quarters">
+                분기 <span class="filter-icon">🔽</span>
+                <div class="filter-dropdown" id="quartersFilter">
+                  <div class="filter-option" data-value="">전체</div>
+                  <div class="filter-option" data-value="1분기">1분기</div>
+                  <div class="filter-option" data-value="2분기">2분기</div>
+                  <div class="filter-option" data-value="3분기">3분기</div>
+                  <div class="filter-option" data-value="4분기">4분기</div>
+                </div>
+              </th>
+              <th class="sortable-header" data-sort="title">
+                프로젝트 <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable-header" data-sort="timeZone">
+                시간대 <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable-header" data-sort="place">
+                장소 <span class="sort-icon">↕</span>
+              </th>
+              <th class="filter-header" data-filter="status">
+                상태 <span class="filter-icon">🔽</span>
+                <div class="filter-dropdown" id="statusFilter">
+                  <div class="filter-option" data-value="">전체</div>
+                  <div class="filter-option" data-value="TO_DO">시작전</div>
+                  <div class="filter-option" data-value="IN_PROGRESS">진행중</div>
+                  <div class="filter-option" data-value="ON_HOLD">보류</div>
+                  <div class="filter-option" data-value="DONE">완료</div>
+                </div>
+              </th>
             </tr>
           </thead>
-          <tbody id="project-list">
-            <!-- JS로 동적으로 행을 추가 -->
-          </tbody>
-        </table>
+        <tbody id="project-list">
+          <!-- JS로 동적으로 행을 추가 -->
+        </tbody>
+      </table>
+      
+      <!-- 로딩 인디케이터 -->
+      <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>프로젝트를 불러오는 중...</p>
       </div>
-
-      <!-- 검색기능 -->
-      <div class="search-container" style="display: none;">
-        <form th:action="@{/project}" method="get" class="search-form">
-          <input type="text" name="searchKeyword" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
-          <button type="submit">검색</button>
-        </form>
+      
+      <!-- 더 이상 데이터가 없음을 표시 -->
+      <div id="noMoreData" class="no-more-data" style="display: none;">
+        <p>더 이상 불러올 프로젝트가 없습니다.</p>
       </div>
-
-      <!-- 페이징 -->
-      <div th:if="${!projectList.isEmpty()}" class="pagination-container" style="display: none;">
-        <ul class="pagination"
-            th:with="
-                          pageNumber = ${projectList.pageable.pageNumber},
-                          pageSize = ${projectList.pageable.pageSize},
-                          totalPages = ${projectList.totalPages},
-                          startPage = ${T(java.lang.Math).floor(pageNumber / pageSize) * pageSize + 1},
-                          tempEndPage = ${startPage + pageSize - 1},
-                          endPage = (${tempEndPage < totalPages ? tempEndPage : totalPages})">
-
-          <li th:classappend="${projectList.first} ? 'disabled'" class="page-item">
-            <a class="page-link" th:href="${projectList.first} ? '#' : @{/(page=${pageNumber - 1})}">
-              <span aria-hidden="true"><</span>
-            </a>
-          </li>
-
-          <li th:each="page: ${#numbers.sequence(startPage, endPage)}" th:classappend="${page == pageNumber + 1} ? 'active'" class="page-item">
-            <a th:text="${page}" class="page-link" th:href="@{/(page=${page - 1})}"></a>
-          </li>
-
-          <li th:classappend="${projectList.last} ? 'disabled'" class="page-item">
-            <a class="page-link" th:href="${projectList.last} ? '#' : @{/(page=${pageNumber + 1})}" aria-label="Next">
-              <span aria-hidden="true">&gt;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+    </div>
   </div>
 
   <!-- Show Project Detail -->
@@ -75,7 +74,9 @@
     <div class="modal-content" style="background:#fff; margin:10vh auto; padding:24px; border-radius:8px; max-width:400px; position:relative;">
       <span class="close" style="position:absolute; right:16px; top:8px; cursor:pointer; font-size:24px;">&times;</span>
       <h2 id="modalTitle"></h2>
-      <p><strong>시작일자:</strong> <span id="modalStartDate"></span></p>
+      <p><strong>시간대:</strong> <span id="modalTimeZone"></span></p>
+      <p><strong>목표 월:</strong> <span id="modalTargetMonths"></span></p>
+      <p><strong>분기:</strong> <span id="modalQuarters"></span></p>
       <p><strong>장소:</strong> <span id="modalPlace"></span></p>
       <p><strong>상태:</strong> <span id="modalStatus"></span></p>
     </div>
@@ -87,7 +88,45 @@
     const editModal = document.getElementById('editModal');
     const closeBtn = document.querySelector('.close');
     const createProjectBtn = document.getElementById('create-project-btn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const noMoreData = document.getElementById('noMoreData');
+    const sortableHeaders = document.querySelectorAll('.sortable-header');
+    const filterHeaders = document.querySelectorAll('.filter-header');
+    
     let currentProjectId = null;
+    let currentPage = 0;
+    let isLoading = false;
+    let hasMoreData = true;
+    let currentSort = { field: 'id', direction: 'desc' };
+    let currentFilters = { quarters: '', status: '' };
+    let allProjects = [];
+    let filteredProjects = [];
+
+    // 프로젝트 데이터 로드
+    async function loadProjects(page = 0, reset = false) {
+      if (isLoading) return;
+      
+      isLoading = true;
+      loadingIndicator.style.display = 'block';
+      
+      try {
+        const response = await fetch('/api/project');
+        if (!response.ok) throw new Error('프로젝트 목록을 불러올 수 없습니다');
+        
+        const data = await response.json();
+        allProjects = data.content || [];
+        
+        // 필터링 및 정렬 적용
+        applyFiltersAndSort();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('프로젝트 목록을 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        isLoading = false;
+        loadingIndicator.style.display = 'none';
+      }
+    }
 
     // 프로젝트 상세 정보 조회
     async function showProjectDetails(projectId) {
@@ -106,9 +145,11 @@
     // 모달 표시
     function showModal(project) {
       document.getElementById('modalTitle').textContent = project.title;
-      document.getElementById('modalStartDate').textContent = project.startDate;
-      document.getElementById('modalPlace').textContent = project.place;
-      document.getElementById('modalStatus').textContent = project.status;
+      document.getElementById('modalTimeZone').textContent = project.timeZone || '-';
+      document.getElementById('modalTargetMonths').textContent = project.targetMonths || '-';
+      document.getElementById('modalQuarters').textContent = project.quarters || '-';
+      document.getElementById('modalPlace').textContent = project.place || '-';
+      document.getElementById('modalStatus').textContent = project.status || '-';
       document.getElementById('projectModal').style.display = 'block';
     }
 
@@ -146,12 +187,13 @@
       const status = statusMap[project.status] || { label: project.status, class: '' };
 
       tr.innerHTML = `
-        <td>${project.startDate || '-'}</td>
+        <td>${project.quarters || '-'}</td>
         <td>
           <a href="#" class="project-name" data-id="${project.id}">
             ${project.title}
           </a>
         </td>
+        <td>${project.timeZone || '-'}</td>
         <td>${project.place || '-'}</td>
         <td>
           <span class="status-tag ${status.class}" data-id="${project.id}" data-status="${project.status}">
@@ -180,7 +222,7 @@
       const tbody = document.getElementById('project-list');
       tbody.innerHTML = `
         <tr>
-          <td colspan="4">
+          <td colspan="5">
             <div class="empty">
               <h3>아직 프로젝트가 없습니다.</h3>
               <p>첫 번째 프로젝트를 생성해보세요!</p>
@@ -190,10 +232,184 @@
       `;
     }
 
+    // 필터링 및 정렬 적용
+    function applyFiltersAndSort() {
+      // 필터링 적용
+      let filtered = [...allProjects];
+      
+      // 분기 필터링
+      if (currentFilters.quarters) {
+        filtered = filtered.filter(project => 
+          project.quarters && project.quarters.includes(currentFilters.quarters)
+        );
+      }
+      
+      // 상태 필터링
+      if (currentFilters.status) {
+        filtered = filtered.filter(project => 
+          project.status === currentFilters.status
+        );
+      }
+      
+      // 정렬 적용
+      filtered.sort((a, b) => {
+        let aValue = a[currentSort.field] || '';
+        let bValue = b[currentSort.field] || '';
+        
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        
+        if (currentSort.direction === 'asc') {
+          return aValue > bValue ? 1 : -1;
+        } else {
+          return aValue < bValue ? 1 : -1;
+        }
+      });
+      
+      filteredProjects = filtered;
+      renderProjects();
+    }
+
+    // 프로젝트 렌더링
+    function renderProjects() {
+      projectList.innerHTML = '';
+      
+      if (filteredProjects.length === 0) {
+        showEmptyMessage();
+        return;
+      }
+      
+      // 페이지네이션 적용 (한 번에 10개씩)
+      const startIndex = currentPage * 10;
+      const endIndex = startIndex + 10;
+      const pageProjects = filteredProjects.slice(startIndex, endIndex);
+      
+      pageProjects.forEach(project => addProjectToList(project));
+      
+      // 더 많은 데이터가 있는지 확인
+      hasMoreData = endIndex < filteredProjects.length;
+      if (!hasMoreData) {
+        noMoreData.style.display = 'block';
+      } else {
+        noMoreData.style.display = 'none';
+      }
+    }
+
+    // 헤더 클릭 이벤트 처리
+    function handleHeaderClick(field) {
+      const header = document.querySelector(`[data-sort="${field}"]`);
+      
+      // 정렬 방향 변경
+      if (currentSort.field === field) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.field = field;
+        currentSort.direction = 'asc';
+      }
+      
+      // 모든 헤더의 아이콘 초기화
+      document.querySelectorAll('.sort-icon').forEach(icon => {
+        icon.textContent = '↕';
+      });
+      
+      // 현재 헤더의 아이콘 업데이트
+      const icon = header.querySelector('.sort-icon');
+      icon.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
+      
+      // 정렬 적용
+      applyFiltersAndSort();
+    }
+
+    // 필터 드롭다운 토글
+    function toggleFilterDropdown(filterType) {
+      const dropdown = document.getElementById(filterType + 'Filter');
+      const allDropdowns = document.querySelectorAll('.filter-dropdown');
+      
+      // 다른 드롭다운들 닫기
+      allDropdowns.forEach(dd => {
+        if (dd !== dropdown) {
+          dd.style.display = 'none';
+        }
+      });
+      
+      // 현재 드롭다운 토글
+      if (dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+      } else {
+        dropdown.style.display = 'block';
+      }
+    }
+
+    // 필터 옵션 선택
+    function selectFilterOption(filterType, value) {
+      currentFilters[filterType] = value;
+      
+      // 필터 아이콘 업데이트
+      const header = document.querySelector(`[data-filter="${filterType}"]`);
+      const icon = header.querySelector('.filter-icon');
+      icon.textContent = value ? '🔽' : '🔽';
+      
+      // 드롭다운 닫기
+      document.getElementById(filterType + 'Filter').style.display = 'none';
+      
+      // 필터 적용
+      applyFiltersAndSort();
+    }
+
+    // 스크롤 이벤트 (인피니티 스크롤)
+    function handleScroll() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+        if (hasMoreData && !isLoading) {
+          currentPage++;
+          renderProjects();
+        }
+      }
+    }
+
+    // 헤더 클릭 이벤트
+    sortableHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const field = this.getAttribute('data-sort');
+        handleHeaderClick(field);
+      });
+    });
+
+    // 필터 헤더 클릭 이벤트
+    filterHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const filterType = this.getAttribute('data-filter');
+        toggleFilterDropdown(filterType);
+      });
+    });
+
+    // 필터 옵션 클릭 이벤트
+    document.querySelectorAll('.filter-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const filterType = this.closest('.filter-dropdown').id.replace('Filter', '');
+        const value = this.getAttribute('data-value');
+        selectFilterOption(filterType, value);
+      });
+    });
+
+    // 드롭다운 외부 클릭 시 닫기
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.filter-header')) {
+        document.querySelectorAll('.filter-dropdown').forEach(dd => {
+          dd.style.display = 'none';
+        });
+      }
+    });
+
+    // 스크롤 이벤트 리스너
+    window.addEventListener('scroll', handleScroll);
+
     // ESC 키로 모달 닫기
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeModal();
     });
+
+    // 초기 데이터 로드
+    loadProjects();
 
     // 프로젝트 삭제
     window.deleteProject = function(id) {
@@ -213,95 +429,26 @@
       }
     };
 
-    //프로젝트 리스트 조회
+    //프로젝트 리스트 조회 (간단한 버전)
     function loadProjects() {
+      if (isLoading) return;
+      
+      isLoading = true;
+      loadingIndicator.style.display = 'block';
+      
       fetch('/api/project')
         .then(response => response.json())
-        .then(response => {
-          const tableContainer = document.getElementById('table-container');
-          const searchContainer = document.querySelector('.search-container');
-          const paginationContainer = document.querySelector('.pagination-container');
-          
-          // Spring Boot 페이징 응답 구조에 맞게 수정
-          const projects = response.content || response;
-          const isEmpty = response.empty !== undefined ? response.empty : (!projects || projects.length === 0);
-          
-          // actions 버튼 처리
-          let actions = document.querySelector('.actions');
-          if (!isEmpty && projects && projects.length > 0) {
-            // 데이터가 있으면 테이블과 검색, 페이징 표시
-            tableContainer.style.display = 'block';
-            searchContainer.style.display = 'block';
-            if (paginationContainer) paginationContainer.style.display = 'block';
-            
-            // actions 버튼이 없으면 동적으로 추가
-            if (!actions) {
-              actions = document.createElement('div');
-              actions.className = 'actions';
-              actions.innerHTML = '<a href="/project/create">새 프로젝트 생성</a>';
-              tableContainer.parentNode.insertBefore(actions, tableContainer);
-            } else {
-              actions.style.display = 'block';
-            }
-            
-            const tbody = document.getElementById('project-list');
-            tbody.innerHTML = '';
-            projects.forEach(project => {
-              addProjectToList(project);
-            });
-          } else {
-            // 데이터가 없으면 테이블과 검색, 페이징 숨기고 빈 상태 메시지 표시
-            tableContainer.style.display = 'none';
-            searchContainer.style.display = 'none';
-            if (paginationContainer) paginationContainer.style.display = 'none';
-            if (actions) actions.style.display = 'none';
-            
-            // 빈 상태 메시지를 컨테이너에 직접 추가
-            const container = document.querySelector('.container');
-            const existingEmpty = container.querySelector('.empty-message');
-            if (existingEmpty) existingEmpty.remove();
-            
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'empty-message';
-            emptyMessage.innerHTML = `
-              <div class="empty">
-                <h3>아직 프로젝트가 없습니다.</h3>
-                <p>첫 번째 프로젝트를 생성해보세요!</p>
-                <div class="nav-links">
-                  <a href="/project/create">🏄🏻 새 프로젝트 생성</a>
-                </div>
-              </div>
-            `;
-            container.appendChild(emptyMessage);
-          }
+        .then(data => {
+          allProjects = data.content || [];
+          applyFiltersAndSort();
         })
         .catch(error => {
           console.error('Error loading projects:', error);
-          // 오류 시에도 빈 상태 메시지 표시
-          const tableContainer = document.getElementById('table-container');
-          const searchContainer = document.querySelector('.search-container');
-          const paginationContainer = document.querySelector('.pagination-container');
-          tableContainer.style.display = 'none';
-          searchContainer.style.display = 'none';
-          if (paginationContainer) paginationContainer.style.display = 'none';
-          if (actions) actions.style.display = 'none';
-          
-          const container = document.querySelector('.container');
-          const existingEmpty = container.querySelector('.empty-message');
-          if (existingEmpty) existingEmpty.remove();
-          
-          const emptyMessage = document.createElement('div');
-          emptyMessage.className = 'empty-message';
-          emptyMessage.innerHTML = `
-            <div class="empty">
-              <h3>프로젝트 목록을 불러올 수 없습니다.</h3>
-              <p>잠시 후 다시 시도해주세요.</p>
-              <div class="nav-links">
-                <a href="/project/create">🏄🏻 새 프로젝트 생성</a>
-              </div>
-            </div>
-          `;
-          container.appendChild(emptyMessage);
+          alert('프로젝트 목록을 불러오는 중 오류가 발생했습니다.');
+        })
+        .finally(() => {
+          isLoading = false;
+          loadingIndicator.style.display = 'none';
         });
     }
     // 초기 프로젝트 목록 로드
