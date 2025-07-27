@@ -8,12 +8,19 @@ services:
       MYSQL_DATABASE: study
       MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
       MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:
       - mysql-data-dev:/var/lib/mysql
     networks:
-      - backend
+      - study-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   app:
     image: study-app:v1.0.0
     container_name: study-app
@@ -125,5 +132,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  mysql-data-dev:
     driver: local
