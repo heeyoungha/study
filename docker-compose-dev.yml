@@ -13,7 +13,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data-dev:/var/lib/mysql
+      - study_mysql-data-dev:/var/lib/mysql:external
     networks:
       - study-network
     healthcheck:
@@ -59,8 +59,8 @@ services:
       - ./nginx/conf.d/app-dev.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt/live/letsadam.shop:/etc/letsencrypt/live/letsadam.shop:ro
       - /etc/letsencrypt/archive/letsadam.shop:/etc/letsencrypt/archive/letsadam.shop:ro
-      - ./src/main/resources/static:/var/www/html
-      - ./python-api/static:/var/www/html/static #파이썬 정적파일
+      - ./src/main/resources/static:/var/www/html/spring-static
+      - ./python-api/static:/var/www/html/python-static
       - ./django-commerce/staticfiles:/var/www/html/django-staticfiles
     depends_on:
       - app
@@ -132,5 +132,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data-dev:
-    driver: local
+  study_mysql-data-dev:
+    external: true
