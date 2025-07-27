@@ -22,9 +22,6 @@ services:
       timeout: 5s
       retries: 5
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: study-app:v1.0.0
     container_name: study-app
     restart: unless-stopped
@@ -51,9 +48,9 @@ services:
       - ./logs/app:/app/logs
 
   nginx:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: study-nginx
-    restart: unless-stopped
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -78,9 +75,6 @@ services:
       retries: 3
 
   python-api:
-    build:
-      context: ./python-api
-      dockerfile: Dockerfile
     image: python-api:v1.0.0
     container_name: python-api
     restart: unless-stopped
@@ -100,11 +94,7 @@ services:
       - mysql
     networks:
       - study-network
-
   django-commerce:
-    build:
-      context: ./django-commerce
-      dockerfile: Dockerfile
     image: django-commerce:v1.0.0
     container_name: django-commerce
     restart: unless-stopped
