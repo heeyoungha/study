@@ -98,14 +98,16 @@ button:hover {
 
 /* 네비게이션 링크 */
 .nav-links {
-    text-align: center;
-    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
 }
 
 .nav-links a {
-    color: #007bff;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
     text-decoration: none;
-    margin: 0 10px;
+    border-radius: 5px;
 }
 .nav-links a:hover {
     text-decoration: underline;

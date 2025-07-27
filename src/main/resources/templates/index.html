@@ -4,55 +4,7 @@
     <meta charset="UTF-8">
     <title>Landing Page</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 20px;
-        }
-        #contents {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-        }
-
-        nav a {
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .content-section {
-            text-align: center;
-        }
-
-        .content-section p {
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
-        .content-section img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
 </head>
 <body>
 
@@ -60,10 +12,10 @@
     <h1>Welcome <span th:text="${username}">Username</span>,</h1>
     <h2>사담으로 연결되는 시간, Let's Sadam!</h2>
 
-    <!-- 공통 네비게이션 불러오기 -->
-    <div th:replace="~{fragment/nav :: navigation}"></div>
-
     <div class="content-section">
+        <!-- 공통 네비게이션 불러오기 -->
+        <div th:replace="~{fragment/nav :: navigation}"></div>
+
         <p>Explore various sections of the platform using the navigation menu above. You can find and interact with boards, view or create projects, check user profiles, and even find local cafes!</p>
         <img th:src="@{/img/img.jpg}" alt="Landing Page Image">
 
