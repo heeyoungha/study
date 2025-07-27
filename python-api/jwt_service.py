@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 # Spring Boot와 동일한 환경변수 사용
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default-jwt-secret")
-JWT_ALGORITHM = "HS256"  # Spring Boot와 동일한 알고리즘 사용
+JWT_ALGORITHM = "HS512"  # Spring Boot와 동일한 알고리즘 사용
 
 def get_user_info_from_jwt(token: str):
     try:
