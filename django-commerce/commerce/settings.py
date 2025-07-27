@@ -216,27 +216,30 @@ SPECTACULAR_SETTINGS = {
 
 # FORCE_SCRIPT_NAME 설정 (nginx /commerce 프리픽스 처리)
 FORCE_SCRIPT_NAME = '/commerce'
-
 # CSRF 설정 (서브도메인 환경용)
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
     'http://localhost',
     'https://127.0.0.1',
     'http://127.0.0.1',
+    'https://letsadam.shop',
+    'http://letsadam.shop',
 ]
 
-# CSRF 쿠키 설정
-CSRF_COOKIE_SECURE = False  # 개발 환경에서는 False
+# CSRF 쿠키 설정 (HTTPS 환경용)
+CSRF_COOKIE_SECURE = True  # HTTPS 환경에서는 True
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = None  # 모든 크로스 사이트 요청 허용
+CSRF_COOKIE_SAMESITE = 'Lax'  # 보안 강화
 CSRF_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용
+# CSRF_COOKIE_PATH = '/commerce/'  # 마이크로서비스 환경에서는 제거
 
-# 세션 쿠키 설정
-SESSION_COOKIE_SECURE = False  # 개발 환경에서는 False
+# 세션 쿠키 설정 (HTTPS 환경용)
+SESSION_COOKIE_SECURE = True  # HTTPS 환경에서는 True
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = None  # 모든 크로스 사이트 요청 허용
+SESSION_COOKIE_SAMESITE = 'Lax'  # 보안 강화
 SESSION_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용
+SESSION_COOKIE_PATH = '/commerce/'  # Django Commerce 경로 설정
 
-# CSRF 검증 예외 설정 (개발 환경용)
+# CSRF 검증 예외 설정
 CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
  
