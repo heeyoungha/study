@@ -65,6 +65,9 @@
       <!-- 더 이상 데이터가 없음을 표시 -->
       <div id="noMoreData" class="no-more-data" style="display: none;">
         <p>더 이상 불러올 프로젝트가 없습니다.</p>
+        <div class="nav-links">
+          <a href="/project/create">🚀 새 프로젝트 생성</a>
+        </div>
       </div>
     </div>
   </div>
@@ -218,14 +221,13 @@
     }
 
     // 빈 상태 메시지 표시
-    function showEmptyMessage() {
+    function 젝() {
       const tbody = document.getElementById('project-list');
       tbody.innerHTML = `
         <tr>
           <td colspan="5">
             <div class="empty">
-              <h3>아직 프로젝트가 없습니다.</h3>
-              <p>첫 번째 프로젝트를 생성해보세요!</p>
+              <p>프로젝트가 없습니다.</p>
             </div>
           </td>
         </tr>
