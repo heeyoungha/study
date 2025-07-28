@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/cart/add/', views.cart_add_item, name='cart_add_item'),
     path('api/cart/<int:item_id>/update/', views.cart_update_item, name='cart_update_item'),
     path('api/cart/<int:item_id>/remove/', views.cart_remove_item, name='cart_remove_item'),
+    path('api/cart/clear/', views.cart_clear, name='cart_clear'),
     
     # 주문 관련 API
     path('api/checkout/', views.checkout_view, name='checkout_view'),

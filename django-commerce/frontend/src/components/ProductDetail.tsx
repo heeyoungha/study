@@ -53,9 +53,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
     }
   };
 
-  const addToCart = () => {
-    // TODO: JWT 인증 후 장바구니 추가 기능 구현
-    alert(`장바구니에 ${product?.name} ${quantity}개가 추가되었습니다.`);
+  const addToCart = async () => {
+    if (!product) return;
+    
+    try {
+      // TODO: 실제 인증 토큰을 사용해야 합니다
+      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      await axios.post(`${API_BASE_URL}/api/cart/add/`, {
+        product_id: product.id,
+        quantity: quantity
+      }, { headers });
+      alert(`장바구니에 ${product.name} ${quantity}개가 추가되었습니다.`);
+    } catch (err) {
+      alert('장바구니 추가 중 오류가 발생했습니다.');
+      console.error('Error adding to cart:', err);
+    }
   };
 
   const formatPrice = (price: number) => {

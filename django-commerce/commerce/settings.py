@@ -35,11 +35,16 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # CORS 설정
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # 개발 환경에서만 True
 CORS_ALLOW_CREDENTIALS = True
+
+# 운영 환경에서 CORS 설정
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://letsadam.shop,https://www.letsadam.shop').split(',')
+    CORS_ALLOW_CREDENTIALS = True
 
 # JWT 설정
 REST_FRAMEWORK = {
@@ -227,15 +232,26 @@ CSRF_TRUSTED_ORIGINS = [
     'http://letsadam.shop',
 ]
 
+# 운영 환경 보안 설정
+if not DEBUG:
+    # HTTPS 강제 리다이렉트
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 보안 헤더 설정
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+
 # CSRF 쿠키 설정 (HTTPS 환경용)
-CSRF_COOKIE_SECURE = True  # HTTPS 환경에서는 True
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'True').lower() == 'true'
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'  # 보안 강화
 CSRF_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용
 # CSRF_COOKIE_PATH = '/commerce/'  # 마이크로서비스 환경에서는 제거
 
 # 세션 쿠키 설정 (HTTPS 환경용)
-SESSION_COOKIE_SECURE = True  # HTTPS 환경에서는 True
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True').lower() == 'true'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'  # 보안 강화
 SESSION_COOKIE_DOMAIN = None  # 모든 도메인에서 쿠키 허용

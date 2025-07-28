@@ -140,7 +140,7 @@ def cart_add_item(request):
     request=CartItemSerializer,
     responses={200: CartItemSerializer}
 )
-@api_view(['PUT'])
+@api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def cart_update_item(request, item_id):
     """장바구니 아이템 수량 변경"""
@@ -177,6 +177,23 @@ def cart_remove_item(request, item_id):
     
     cart_item.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@extend_schema(
+    tags=['cart'],
+    summary='장바구니 비우기',
+    description='장바구니의 모든 아이템을 삭제합니다.',
+    responses={204: None}
+)
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def cart_clear(request):
+    """장바구니 비우기"""
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cart.cartitem_set.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Cart.DoesNotExist:
+        return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
 
 # 주문 관련 API
 @extend_schema(

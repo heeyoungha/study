@@ -28,7 +28,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         return obj.get_total_price()
 
 class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)
+    items = CartItemSerializer(source='cartitem_set', many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
     item_count = serializers.SerializerMethodField()
     
