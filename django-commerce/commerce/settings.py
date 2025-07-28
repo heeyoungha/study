@@ -215,7 +215,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 # FORCE_SCRIPT_NAME 설정 (nginx /commerce 프리픽스 처리)
-FORCE_SCRIPT_NAME = '/commerce'
+# 로컬 개발 환경에서는 비활성화
+# FORCE_SCRIPT_NAME = '/commerce'
 # CSRF 설정 (서브도메인 환경용)
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
