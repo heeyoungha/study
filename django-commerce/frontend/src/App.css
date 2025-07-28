@@ -1,0 +1,14 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+  padding: 20px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+}

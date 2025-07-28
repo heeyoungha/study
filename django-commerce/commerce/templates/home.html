@@ -68,11 +68,11 @@
             
             <div class="endpoint">
                 <h3>📚 API 문서</h3>
-                <p><strong>Swagger UI:</strong> {% url 'swagger-ui' %}</p>
-                <p><strong>ReDoc:</strong> {% url 'redoc' %}</p>
+                <p><strong>Swagger UI:</strong> /api/docs/</p>
+                <p><strong>ReDoc:</strong> /api/redoc/</p>
                 <p><strong>설명:</strong> 인터랙티브 API 문서 및 테스트</p>
-                <a href="{% url 'swagger-ui' %}" class="btn" style="background: #ff6b35;">Swagger 문서</a>
-                <a href="{% url 'redoc' %}" class="btn" style="background: #2ecc71;">ReDoc 문서</a>
+                <a href="/commerce/api/docs/" class="btn" style="background: #ff6b35;">Swagger 문서</a>
+                <a href="/commerce/api/redoc/" class="btn" style="background: #2ecc71;">ReDoc 문서</a>
             </div>
             
             <div class="endpoint">
@@ -80,6 +80,41 @@
                 <p><strong>URL:</strong> /admin/</p>
                 <p><strong>설명:</strong> Django Admin을 통한 상품 관리</p>
                 <a href="{% url 'admin:index' %}" class="btn">관리자 페이지</a>
+            </div>            
+            <div class="endpoint">
+                <h3>상품 목록 API</h3>
+                <p><strong>URL:</strong> /store/api/products/</p>
+                <p><strong>메서드:</strong> GET</p>
+                <p><strong>설명:</strong> 모든 상품 목록 조회</p>
+                <a href="{% url 'product-list' %}" class="btn">상품 목록 보기</a>
+            </div>
+            
+            <div class="endpoint">
+                <h3>상품 상세 API</h3>
+                <p><strong>URL:</strong> /store/api/products/{id}/</p>
+                <p><strong>메서드:</strong> GET</p>
+                <p><strong>설명:</strong> 특정 상품 상세 정보 조회</p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>상품 생성 API</h3>
+                <p><strong>URL:</strong> /store/api/products/</p>
+                <p><strong>메서드:</strong> POST</p>
+                <p><strong>설명:</strong> 새로운 상품 생성</p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>상품 수정 API</h3>
+                <p><strong>URL:</strong> /store/api/products/{id}/</p>
+                <p><strong>메서드:</strong> PUT</p>
+                <p><strong>설명:</strong> 기존 상품 정보 수정</p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>상품 삭제 API</h3>
+                <p><strong>URL:</strong> /store/api/products/{id}/</p>
+                <p><strong>메서드:</strong> DELETE</p>
+                <p><strong>설명:</strong> 상품 삭제</p>
             </div>
         </div>
         
