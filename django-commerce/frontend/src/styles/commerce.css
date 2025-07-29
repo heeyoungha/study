@@ -399,6 +399,17 @@
   background: #2563eb;
 }
 
+.error-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.error-actions .btn {
+  margin: 0;
+}
+
 /* Controls Section */
 .controls {
   padding: 20px 30px;
@@ -850,4 +861,16 @@
 
 .modal .btn {
   margin: 0 10px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-actions .btn {
+  margin: 0;
+  min-width: 100px;
 } 

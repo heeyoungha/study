@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getAuthHeaders, isAuthenticated, redirectToLogin } from '../utils/auth';
 import '../styles/commerce.css';
 
 interface CartItem {
@@ -27,22 +28,31 @@ const Cart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const API_BASE_URL = 'http://localhost:8002/store';
+  const API_BASE_URL = '/commerce/store';
 
   // 장바구니 조회
   const fetchCart = async () => {
+    // 인증 상태 확인
+    if (!isAuthenticated()) {
+      setError('로그인이 필요합니다.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      // TODO: 실제 인증 토큰을 사용해야 합니다
-      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
       
       const response = await axios.get<CartData>(`${API_BASE_URL}/api/cart/`, { headers });
       console.log('Cart API response:', response.data);
       setCart(response.data);
       setError(null);
-    } catch (err) {
-      setError('장바구니를 불러오는 중 오류가 발생했습니다.');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        setError('로그인이 필요합니다.');
+      } else {
+        setError('장바구니를 불러오는 중 오류가 발생했습니다.');
+      }
       console.error('Error fetching cart:', err);
     } finally {
       setLoading(false);
@@ -52,9 +62,7 @@ const Cart: React.FC = () => {
   // 수량 변경
   const updateQuantity = async (itemId: number, quantity: number) => {
     try {
-      // TODO: 실제 인증 토큰을 사용해야 합니다
-      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
       
       await axios.patch<CartData>(`${API_BASE_URL}/api/cart/${itemId}/update/`, {
         quantity: quantity
@@ -70,9 +78,7 @@ const Cart: React.FC = () => {
   // 상품 제거
   const removeItem = async (itemId: number) => {
     try {
-      // TODO: 실제 인증 토큰을 사용해야 합니다
-      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
       
       const response = await axios.delete<CartData>(`${API_BASE_URL}/api/cart/${itemId}/remove/`, {
         data: { item_id: itemId },
@@ -87,9 +93,7 @@ const Cart: React.FC = () => {
   // 장바구니 비우기
   const clearCart = async () => {
     try {
-      // TODO: 실제 인증 토큰을 사용해야 합니다
-      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
       
       const response = await axios.delete<CartData>(`${API_BASE_URL}/api/cart/clear/`, { headers });
       setCart(response.data);
@@ -122,11 +126,24 @@ const Cart: React.FC = () => {
 
   if (error) {
     return (
-      <div className="error-container">
-        <p>{error}</p>
-        <button onClick={fetchCart} className="retry-button">
-          다시 시도
-        </button>
+      <div className="commerce-container">
+        <div className="commerce-main">
+          <div className="commerce-header">
+            <h1>🛒 장바구니</h1>
+            <p>로그인이 필요합니다</p>
+          </div>
+          <div className="error-container">
+            <p>{error}</p>
+            <div className="error-actions">
+              <button onClick={fetchCart} className="retry-button">
+                다시 시도
+              </button>
+              <button onClick={redirectToLogin} className="btn btn-primary">
+                로그인 화면으로 가기
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

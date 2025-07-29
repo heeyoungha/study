@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getAuthHeaders, isAuthenticated, redirectToLogin } from '../utils/auth';
 import '../styles/commerce.css';
 
 interface Product {
@@ -26,7 +27,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
 
-  const API_BASE_URL = 'http://localhost:8002/store';
+  const API_BASE_URL = '/commerce/store';
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -53,23 +54,42 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
     }
   };
 
-  const addToCart = async () => {
+  const addToCart = () => {
     if (!product) return;
     
-    try {
-      // TODO: 실제 인증 토큰을 사용해야 합니다
-      const token = localStorage.getItem('authToken'); // 또는 다른 방식으로 토큰 가져오기
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      await axios.post(`${API_BASE_URL}/api/cart/add/`, {
-        product_id: product.id,
-        quantity: quantity
-      }, { headers });
-      alert(`장바구니에 ${product.name} ${quantity}개가 추가되었습니다.`);
-    } catch (err) {
-      alert('장바구니 추가 중 오류가 발생했습니다.');
-      console.error('Error adding to cart:', err);
+    // 로그인 상태 확인
+    if (!isAuthenticated()) {
+      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+      redirectToLogin();
+      return;
     }
+    
+    // 로그인된 경우에만 API 호출
+    const addToCartAsync = async () => {
+      try {
+        const headers = getAuthHeaders();
+        
+        await axios.post(`${API_BASE_URL}/api/cart/add/`, {
+          product_id: product.id,
+          quantity: quantity
+        }, { headers });
+        alert(`장바구니에 ${product.name} ${quantity}개가 추가되었습니다.`);
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+          redirectToLogin();
+        } else {
+          alert('장바구니 추가 중 오류가 발생했습니다.');
+        }
+        console.error('Error adding to cart:', err);
+      }
+    };
+
+    addToCartAsync();
+  };
+
+  const handleDirectPurchase = () => {
+    alert('바로 구매 기능은 준비 중입니다. 장바구니에 추가 후 구매해주세요.');
   };
 
   const formatPrice = (price: number) => {
@@ -196,6 +216,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack }) => {
                   </button>
                   <button 
                     className="btn btn-success"
+                    onClick={handleDirectPurchase}
                     disabled={product.stock === 0}
                   >
                     바로 구매
