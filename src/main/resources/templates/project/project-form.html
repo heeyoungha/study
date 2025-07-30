@@ -55,14 +55,20 @@
             <span class="label-icon">📍</span>
             장소
           </label>
-          <input
-                  type="text"
-                  id="place"
-                  name="place"
-                  required
-                  placeholder="프로젝트 장소를 입력하세요"
-                  class="enhanced-input"
-          >
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input
+                    type="text"
+                    id="place"
+                    name="place"
+                    required
+                    placeholder="프로젝트 장소를 입력하세요"
+                    class="enhanced-input"
+                    style="flex:1; min-width:200px;"
+            >
+            <button type="button" id="findCafeBtn" class="btn btn-secondary" style="padding:8px 12px; border-radius:4px; border:1px solid #6c757d; background:white; color:#6c757d; cursor:pointer; white-space:nowrap; font-size:12px;">
+              ☕ 카페 찾기
+            </button>
+          </div>
         </div>
         
         <div class="form-group">
@@ -119,6 +125,31 @@
       <a href="/bookclub">📚 독서모임</a>
     </div>
   </div>
+
+  <!-- 카페 찾기 모달 -->
+  <div id="cafeModal" class="modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000;">
+    <div class="modal-content" style="background:#fff; margin:5vh auto; padding:24px; border-radius:8px; max-width:600px; position:relative; max-height:90vh; overflow-y:auto;">
+      <span class="close" onclick="closeCafeModal()" style="position:absolute; right:16px; top:8px; cursor:pointer; font-size:24px;">&times;</span>
+      <h2>근처 카페 찾기</h2>
+      
+      <div style="margin-bottom:16px;">
+        <label for="cafeAddress" style="display:block; margin-bottom:4px; font-weight:500;">주소 입력</label>
+        <input type="text" id="cafeAddress" placeholder="주소를 입력하세요" style="width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+      </div>
+      
+      <div id="cafeResults" style="display:none;">
+        <h3>추천 카페 (최대 3개)</h3>
+        <div id="cafeList" style="margin-top:12px;"></div>
+      </div>
+      
+      <div id="cafeLoading" style="display:none; text-align:center; padding:20px;">
+        <p>카페를 검색하고 있습니다...</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Kakao 우편번호 서비스 -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
   var projectId = null;
@@ -243,6 +274,139 @@
               console.error('Error:', error);
               alert('프로젝트 정보를 불러오는 중 오류가 발생했습니다.');
             });
+  }
+
+  // 카페 찾기 모달 열기
+  document.getElementById('findCafeBtn').addEventListener('click', function() {
+    document.getElementById('cafeModal').style.display = 'block';
+  });
+
+  // 카페 모달 닫기
+  window.closeCafeModal = function() {
+    document.getElementById('cafeModal').style.display = 'none';
+  }
+
+  // 카페 주소 입력 필드에 카카오 우편번호 API 연결
+  document.getElementById('cafeAddress').addEventListener('click', function() {
+    new daum.Postcode({
+      oncomplete: function(data) {
+        document.getElementById('cafeAddress').value = data.address;
+        // 주소 입력 후 자동으로 검색 실행
+        setTimeout(() => {
+          searchCafes();
+        }, 500);
+      }
+    }).open();
+  });
+
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (document.getElementById('cafeModal').style.display === 'block') {
+        closeCafeModal();
+      }
+    }
+  });
+
+  // 카페 검색 함수
+  async function searchCafes() {
+    const address = document.getElementById('cafeAddress').value;
+    if (!address.trim()) {
+      alert('주소를 입력해주세요.');
+      return;
+    }
+
+    document.getElementById('cafeLoading').style.display = 'block';
+    document.getElementById('cafeResults').style.display = 'none';
+
+    try {
+      const response = await fetch('/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `address=${encodeURIComponent(address)}`
+      });
+
+      if (!response.ok) {
+        throw new Error('카페 검색에 실패했습니다.');
+      }
+
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const cafeRows = doc.querySelectorAll('tbody tr');
+
+      const cafeList = [];
+      cafeRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+          cafeList.push({
+            name: cells[0].textContent.trim(),
+            address: cells[1].textContent.trim(),
+            distance: cells[2].textContent.trim(),
+            directionUrl: cells[3].querySelector('a')?.href || '',
+            roadViewUrl: cells[4].querySelector('a')?.href || ''
+          });
+        }
+      });
+
+      displayCafeResults(cafeList);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('카페 검색 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+      document.getElementById('cafeLoading').style.display = 'none';
+    }
+  }
+
+  // 카페 결과 표시
+  function displayCafeResults(cafes) {
+    const cafeList = document.getElementById('cafeList');
+    cafeList.innerHTML = '';
+
+    if (cafes.length === 0) {
+      cafeList.innerHTML = '<p style="color:#666; text-align:center;">검색된 카페가 없습니다.</p>';
+      document.getElementById('cafeResults').style.display = 'block';
+      return;
+    }
+
+    cafes.forEach((cafe, index) => {
+      const cafeCard = document.createElement('div');
+      cafeCard.style.cssText = 'border:1px solid #ddd; border-radius:8px; padding:16px; margin-bottom:12px; background:#f9f9f9;';
+      
+              cafeCard.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h4 style="margin:0; color:#333; flex:1; margin-right:8px;">${cafe.name}</h4>
+            <button onclick="selectCafe('${cafe.name}', '${cafe.address}')" style="padding:2px 6px; font-size:10px; border-radius:3px; border:none; background:#007bff; color:white; cursor:pointer; width:32px; height:20px; line-height:16px; text-align:center; flex-shrink:0;">
+              선택
+            </button>
+          </div>
+          <p style="margin:4px 0; color:#666; font-size:14px;"><strong>거리:</strong> ${cafe.distance}</p>
+          <div style="margin-top:8px;">
+            <a href="${cafe.directionUrl}" target="_blank" style="margin-right:8px; color:#007bff; text-decoration:none; font-size:12px;">길안내</a>
+            <a href="${cafe.roadViewUrl}" target="_blank" style="color:#007bff; text-decoration:none; font-size:12px;">로드뷰</a>
+          </div>
+        `;
+      
+      cafeList.appendChild(cafeCard);
+    });
+
+    document.getElementById('cafeResults').style.display = 'block';
+  }
+
+  // 카페 선택
+  window.selectCafe = function(name, address) {
+    document.getElementById('place').value = name;
+    closeCafeModal();
+    
+    // 선택된 카페 정보를 JSON으로 저장 (나중에 사용할 수 있도록)
+    const cafeInfo = {
+      name: name,
+      address: address,
+      selectedAt: new Date().toISOString()
+    };
+    localStorage.setItem('selectedCafe', JSON.stringify(cafeInfo));
   }
 
   // 폼 제출 처리
