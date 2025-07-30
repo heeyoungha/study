@@ -51,3 +51,15 @@ study.pem__pycache__/
 study.pem
 /django-commerce/staticfiles/
 *.log
+
+# Docker images and tar files
+*.tar
+*.tar.gz
+
+# Python virtual environments
+**/venv/
+**/__pycache__/
+
+# Django static files
+django-commerce/static/
+django-commerce/commerce/static/
