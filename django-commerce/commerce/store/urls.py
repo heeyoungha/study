@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # 템플릿 페이지
-    path('products/', views.product_list_page, name='product_list'),
+    path('products/', views.product_list_page, name='product_list_page'),
     
     # 상품 관련 API
     path('api/products/', views.product_list, name='product_list'),

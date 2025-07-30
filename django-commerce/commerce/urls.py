@@ -17,17 +17,28 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import render
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from monitoring import system_health, test_500
 
-def home(request):
-    return render(request, 'home.html')
+def commerce_frontend(request):
+    """React 프론트엔드 서빙"""
+    return render(request, 'commerce/index.html')
 
 urlpatterns = [
-    path('', home, name='home'),
+    # React 프론트엔드 (루트 경로)
+    path('', commerce_frontend, name='commerce_frontend'),
+    
+    # Django Admin
     path('admin/', admin.site.urls),
+    
+    # Store API
     path('store/', include('store.urls')),
+    
+    # JWT 토큰
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
