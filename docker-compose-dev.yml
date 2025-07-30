@@ -62,8 +62,8 @@ services:
       - ./nginx/conf.d/app-dev.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt/live/letsadam.shop:/etc/letsencrypt/live/letsadam.shop:ro
       - /etc/letsencrypt/archive/letsadam.shop:/etc/letsencrypt/archive/letsadam.shop:ro
-      - ./src/main/resources/static:/var/www/html/spring-static
-      - ./python-api/static:/var/www/html/python-static
+      - ./src/main/resources/static:/var/www/html
+      - ./python-api/static:/var/www/html/static #파이썬 정적파일
       - ./django-commerce/staticfiles:/var/www/html/django-staticfiles
     depends_on:
       - app
@@ -72,7 +72,7 @@ services:
     networks:
       - study-network
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost" ]
+      test: [ "CMD", "wget", "--spider", "-q", "https://letsadam.shop" ]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -100,7 +100,6 @@ services:
       - mysql
     networks:
       - study-network
-
   django-commerce:
     build:
       context: ./django-commerce
@@ -111,9 +110,9 @@ services:
     ports:
       - "8002:8000"
     environment:
-      - SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-development-key-change-in-production}
-      - DEBUG=True
-      - ALLOWED_HOSTS=localhost,127.0.0.1,django-commerce
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=False
+      - ALLOWED_HOSTS=django-commerce,letsadam.shop
       - DB_NAME=study
       - DB_USER=${SPRING_DATASOURCE_USERNAME:-root}
       - DB_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-password}
