@@ -49,12 +49,12 @@ if not DEBUG:
 # JWT 설정
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'store.authentication.JWTAuthentication',  # 커스텀 JWT 인증 사용
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# JWT 토큰 설정
+# JWT 토큰 설정 (Spring Boot와 호환)
 from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
@@ -62,7 +62,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
-    'ALGORITHM': 'HS256',
+    'ALGORITHM': 'HS512',  # Spring Boot와 동일한 알고리즘 사용
     'SIGNING_KEY': os.getenv('JWT_SECRET_KEY', SECRET_KEY),  # Spring Boot와 동일한 시크릿 키 사용
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
@@ -72,7 +72,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+    'USER_ID_CLAIM': 'sub',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
@@ -221,7 +221,7 @@ SPECTACULAR_SETTINGS = {
 
 # FORCE_SCRIPT_NAME 설정 (nginx /commerce 프리픽스 처리)
 # 로컬 개발 환경에서는 비활성화
-# FORCE_SCRIPT_NAME = '/commerce'
+FORCE_SCRIPT_NAME = '/commerce'
 # CSRF 설정 (서브도메인 환경용)
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
