@@ -146,7 +146,7 @@ public class ProjectService {
         project.delete();
     }
 
-    public void updateProject(Long id, ProjectRequest.UpdateProjectRequest request) {
+    public ProjectResponse updateProject(Long id, ProjectRequest.UpdateProjectRequest request) {
         Project project = ServiceUtil.findByIdOrThrow(projectRepository, id, DomainException.notFindRow(id));
 
         // 선택된 월들로부터 분기 계산
@@ -156,7 +156,11 @@ public class ProjectService {
             request.getTitle(), 
             request.getTimeZone(), 
             request.getTargetMonths(), 
-            quarters
+            quarters,
+            request.getPlace(),
+            request.getStatus()
         );
+        
+        return new ProjectResponse(project);
     }
 }

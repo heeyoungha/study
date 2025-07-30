@@ -61,12 +61,12 @@ public class ProjectApiController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProject(
+    public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable Long id,
             @RequestBody ProjectRequest.UpdateProjectRequest request) {
 
-            projectService.updateProject(id, request);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            ProjectResponse response = projectService.updateProject(id, request);
+            return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable Long id){

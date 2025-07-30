@@ -72,16 +72,60 @@
     </div>
   </div>
 
-  <!-- Show Project Detail -->
+  <!-- Edit Project Modal -->
   <div id="projectModal" class="modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000;">
-    <div class="modal-content" style="background:#fff; margin:10vh auto; padding:24px; border-radius:8px; max-width:400px; position:relative;">
+    <div class="modal-content" style="background:#fff; margin:5vh auto; padding:24px; border-radius:8px; max-width:500px; position:relative; max-height:90vh; overflow-y:auto;">
       <span class="close" style="position:absolute; right:16px; top:8px; cursor:pointer; font-size:24px;">&times;</span>
-      <h2 id="modalTitle"></h2>
-      <p><strong>시간대:</strong> <span id="modalTimeZone"></span></p>
-      <p><strong>목표 월:</strong> <span id="modalTargetMonths"></span></p>
-      <p><strong>분기:</strong> <span id="modalQuarters"></span></p>
-      <p><strong>장소:</strong> <span id="modalPlace"></span></p>
-      <p><strong>상태:</strong> <span id="modalStatus"></span></p>
+      <h2 id="modalTitle">프로젝트 수정</h2>
+      
+      <form id="editProjectForm">
+        <input type="hidden" id="editProjectId" name="id">
+        
+        <div style="margin-bottom:16px;">
+          <label for="editTitle" style="display:block; margin-bottom:4px; font-weight:500;">프로젝트 제목</label>
+          <input type="text" id="editTitle" name="title" required style="width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label for="editTimeZone" style="display:block; margin-bottom:4px; font-weight:500;">시간대</label>
+          <input type="text" id="editTimeZone" name="timeZone" required style="width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label for="editPlace" style="display:block; margin-bottom:4px; font-weight:500;">장소</label>
+          <input type="text" id="editPlace" name="place" required style="width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label for="editStatus" style="display:block; margin-bottom:4px; font-weight:500;">상태</label>
+          <select id="editStatus" name="status" required style="width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+            <option value="">상태를 선택하세요</option>
+            <option value="TO_DO">시작전</option>
+            <option value="IN_PROGRESS">진행중</option>
+            <option value="ON_HOLD">보류</option>
+            <option value="DONE">완료</option>
+          </select>
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="display:block; margin-bottom:4px; font-weight:500;">목표 월</label>
+          <div id="editMonthGrid" style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; margin-bottom:8px;"></div>
+          <div id="editSelectedMonths" style="font-size:12px; color:#666;">
+            선택된 월: <span id="editMonthTags"></span>
+          </div>
+        </div>
+        
+        <div style="margin-top:24px; display:flex; justify-content:space-between; gap:12px;">
+          <button type="submit" id="updateProjectBtn" class="btn btn-primary" style="flex:1; padding:12px 20px; border-radius:6px; border:none; background:#007bff; color:white; font-weight:500; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 4px rgba(0,123,255,0.2);" onmouseover="this.style.background='#0056b3'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,123,255,0.3)'" onmouseout="this.style.background='#007bff'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,123,255,0.2)'">
+            <span class="button-icon">💾</span>
+            수정 완료
+          </button>
+          <button type="button" id="closeModalBtn" class="btn btn-secondary" style="flex:1; padding:12px 20px; border-radius:6px; border:1px solid #6c757d; background:white; color:#6c757d; font-weight:500; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#5a6268'; this.style.color='#495057'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='white'; this.style.borderColor='#6c757d'; this.style.color='#6c757d'; this.style.transform='translateY(0)'">
+            <span class="button-icon">❌</span>
+            취소
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -145,20 +189,83 @@
       }
     }
 
-    // 모달 표시
+    // 모달 표시 (수정 모드)
     function showModal(project) {
-      document.getElementById('modalTitle').textContent = project.title;
-      document.getElementById('modalTimeZone').textContent = project.timeZone || '-';
-      document.getElementById('modalTargetMonths').textContent = project.targetMonths || '-';
-      document.getElementById('modalQuarters').textContent = project.quarters || '-';
-      document.getElementById('modalPlace').textContent = project.place || '-';
-      document.getElementById('modalStatus').textContent = project.status || '-';
+      // 폼 필드에 데이터 설정
+      document.getElementById('editProjectId').value = project.id;
+      document.getElementById('editTitle').value = project.title || '';
+      document.getElementById('editTimeZone').value = project.timeZone || '';
+      document.getElementById('editPlace').value = project.place || '';
+      document.getElementById('editStatus').value = project.status || '';
+      
+      // 목표 월 설정
+      setupEditMonthSelector();
+      if (project.targetMonths) {
+        const months = project.targetMonths.split(',').map(m => m.trim());
+        setSelectedMonths(months);
+      }
+      
       document.getElementById('projectModal').style.display = 'block';
     }
 
+    // 수정 모드용 월 선택기 설정
+    function setupEditMonthSelector() {
+      const monthGrid = document.getElementById('editMonthGrid');
+      monthGrid.innerHTML = '';
+      
+      const months = [
+        '1월', '2월', '3월', '4월', '5월', '6월',
+        '7월', '8월', '9월', '10월', '11월', '12월'
+      ];
+      
+      months.forEach(month => {
+        const monthButton = document.createElement('button');
+        monthButton.type = 'button';
+        monthButton.className = 'edit-month-button';
+        monthButton.textContent = month;
+        monthButton.style.cssText = 'padding:6px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.2s; color:#333;';
+        monthButton.onclick = () => toggleEditMonth(month, monthButton);
+        monthGrid.appendChild(monthButton);
+      });
+    }
+    
+    // 수정 모드 월 토글
+    function toggleEditMonth(month, button) {
+      if (button.classList.contains('selected')) {
+        button.classList.remove('selected');
+        button.style.background = 'white';
+        button.style.color = '#333';
+      } else {
+        button.classList.add('selected');
+        button.style.background = '#007bff';
+        button.style.color = 'white';
+      }
+      updateEditMonthTags();
+    }
+    
+    // 선택된 월 설정
+    function setSelectedMonths(months) {
+      const buttons = document.querySelectorAll('.edit-month-button');
+      buttons.forEach(button => {
+        if (months.includes(button.textContent)) {
+          button.classList.add('selected');
+          button.style.background = '#007bff';
+          button.style.color = 'white';
+        }
+      });
+      updateEditMonthTags();
+    }
+    
+    // 수정 모드 월 태그 업데이트
+    function updateEditMonthTags() {
+      const selectedButtons = document.querySelectorAll('.edit-month-button.selected');
+      const selectedMonths = Array.from(selectedButtons).map(btn => btn.textContent);
+      document.getElementById('editMonthTags').textContent = selectedMonths.join(', ') || '없음';
+    }
+    
     // 모달 닫기
     function closeModal() {
-      document.getElementsByClassName('closeBtn').style.display = 'none';
+      document.getElementById('projectModal').style.display = 'none';
     }
 
     // 상태 옵션 생성
@@ -221,13 +328,23 @@
     }
 
     // 빈 상태 메시지 표시
-    function 젝() {
+    function showEmptyMessage() {
       const tbody = document.getElementById('project-list');
+      const noMoreDataVisible = noMoreData.style.display === 'block';
+      
       tbody.innerHTML = `
         <tr>
           <td colspan="5">
             <div class="empty">
               <p>프로젝트가 없습니다.</p>
+              ${!noMoreDataVisible ? `
+                <div class="empty-actions">
+                  <a href="/project/create" class="btn btn-primary">
+                    <span class="button-icon">🚀</span>
+                    새 프로젝트 생성
+                  </a>
+                </div>
+              ` : ''}
             </div>
           </td>
         </tr>
@@ -399,6 +516,51 @@
         document.querySelectorAll('.filter-dropdown').forEach(dd => {
           dd.style.display = 'none';
         });
+      }
+    });
+
+    // 모달 닫기 버튼 이벤트
+    document.querySelector('.close').addEventListener('click', closeModal);
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    
+    // 수정 폼 제출 이벤트
+    document.getElementById('editProjectForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const projectId = document.getElementById('editProjectId').value;
+      const selectedMonths = Array.from(document.querySelectorAll('.edit-month-button.selected'))
+        .map(btn => btn.textContent);
+      
+      const formData = {
+        id: projectId,
+        title: document.getElementById('editTitle').value,
+        timeZone: document.getElementById('editTimeZone').value,
+        place: document.getElementById('editPlace').value,
+        status: document.getElementById('editStatus').value,
+        targetMonths: selectedMonths.join(',')
+      };
+      
+      try {
+        const response = await fetch(`/api/project/${projectId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+          throw new Error('프로젝트 수정에 실패했습니다');
+        }
+        
+        alert('프로젝트가 성공적으로 수정되었습니다!');
+        closeModal();
+        // 프로젝트 목록 새로고침
+        loadProjects();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('프로젝트 수정 중 오류가 발생했습니다: ' + error.message);
       }
     });
 

@@ -38,11 +38,13 @@ public class Project extends BaseEntity {
         return project;
     }
 
-    public void updateProject(String title, String timeZone, String targetMonths, String quarters){
+    public void updateProject(String title, String timeZone, String targetMonths, String quarters, String place, String status){
         this.title = title;
         this.timeZone = timeZone;
         this.targetMonths = targetMonths;
         this.quarters = quarters;
+        this.place = place;
+        this.status = status;
     }
 
 }
