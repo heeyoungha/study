@@ -115,7 +115,7 @@ public class SecurityConfig {
                     
                     // JWT를 쿠키에 설정
                     Cookie jwtCookie = new Cookie("jwt", jwt);
-                    jwtCookie.setHttpOnly(true);
+                    jwtCookie.setHttpOnly(false);
                     jwtCookie.setSecure("dev".equals(activeProfile) || "prod".equals(activeProfile));
                     jwtCookie.setPath("/");
                     jwtCookie.setMaxAge(86400); // 24시간
