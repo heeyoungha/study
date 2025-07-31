@@ -30,5 +30,22 @@ echo "6. Gradle 빌드 실행"
 echo "7. 이미지 빌드 및 컨테이너 실행"
 docker-compose up --build -d
 
-echo "8. 이미지 목록 확인"
+echo "8. 컨테이너 시작 대기"
+echo "컨테이너들이 완전히 시작될 때까지 30초 대기..."
+sleep 30
+
+echo "9. Django Commerce 테스트 상품 생성"
+# Django Commerce 컨테이너가 실행 중인지 확인
+if docker ps | grep -q "django-commerce"; then
+    echo "Django Commerce 컨테이너에서 테스트 상품 생성 중..."
+    docker exec django-commerce python manage.py shell < django-commerce/commerce/create_test_products.py
+    echo "✅ 테스트 상품 생성 완료"
+else
+    echo "⚠️ Django Commerce 컨테이너가 실행되지 않았습니다."
+fi
+
+echo "10. 이미지 목록 확인"
 docker image ls | grep -E 'study-app|mysql|nginx|python-api|django-commerce'
+
+echo "11. 컨테이너 상태 확인"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
