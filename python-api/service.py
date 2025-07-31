@@ -16,7 +16,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import date
 import asyncio
+import logging
+from typing import Optional, List
+from sqlalchemy.exc import OperationalError, DisconnectionError
+from models import Diary, BookClubEntry, User
+from datetime import datetime
 from gpt_service import analyze_sentiment_async, recommend_projects_async, analyze_sentiment_with_gpt, recommend_projects_with_gpt
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 재시도 설정
+MAX_RETRIES = 3
+RETRY_DELAY = 1  # 초
+
+async def retry_on_connection_error(func, *args, **kwargs):
+    """데이터베이스 연결 오류 시 재시도하는 함수"""
+    for attempt in range(MAX_RETRIES):
+        try:
+            return await func(*args, **kwargs)
+        except (OperationalError, DisconnectionError) as e:
+            if attempt == MAX_RETRIES - 1:
+                logger.error(f"데이터베이스 연결 실패 (최대 재시도 횟수 초과): {e}")
+                raise
+            logger.warning(f"데이터베이스 연결 오류 (재시도 {attempt + 1}/{MAX_RETRIES}): {e}")
+            await asyncio.sleep(RETRY_DELAY * (attempt + 1))  # 지수 백오프
+    return None
 
 # 기존 동기 감정 분석 (fallback용)
 def analyze_sentiment(content: str) -> str:
@@ -34,6 +60,7 @@ async def analyze_sentiment_enhanced(content: str) -> dict:
     return await analyze_sentiment_with_gpt(content)
 
 async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None, user_id: int = None):
+    async def _save_diary():
     import json
     diary = Diary(
         summary=summary,
@@ -47,8 +74,11 @@ async def save_diary_async(db: AsyncSession, summary: str, content: str, sentime
     await db.commit()
     await db.refresh(diary)
     return diary
+    
+    return await retry_on_connection_error(_save_diary)
 
 async def get_all_diaries_async(db: AsyncSession):
+    async def _get_diaries():
     from models import User
     from sqlalchemy.orm import selectinload
     
@@ -72,6 +102,8 @@ async def get_all_diaries_async(db: AsyncSession):
         diaries.append(diary)
 
     return diaries
+    
+    return await retry_on_connection_error(_get_diaries)
 
 # 새로운 비동기 프로젝트 추천 (GPT 사용)
 async def recommend_projects_enhanced(content: str, sentiment: str) -> dict:
