@@ -21,7 +21,6 @@ async def main():
         port=8000,
         reload=True,
         log_level="info",
-        log_config=os.path.join(os.path.dirname(__file__), "log_config.yaml"),
         proxy_headers=True,
         forwarded_allow_ips="*"
     )

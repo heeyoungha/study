@@ -61,47 +61,47 @@ async def analyze_sentiment_enhanced(content: str) -> dict:
 
 async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None, user_id: int = None):
     async def _save_diary():
-    import json
-    diary = Diary(
-        summary=summary,
-        content=content, 
-        sentiment=sentiment,
-        date=date.today(),
-        recommended_projects=json.dumps(recommended_projects or []),
-        user_id=user_id
-    )
-    db.add(diary)
-    await db.commit()
-    await db.refresh(diary)
-    return diary
+        import json
+        diary = Diary(
+            summary=summary,
+            content=content, 
+            sentiment=sentiment,
+            date=date.today(),
+            recommended_projects=json.dumps(recommended_projects or []),
+            user_id=user_id
+        )
+        db.add(diary)
+        await db.commit()
+        await db.refresh(diary)
+        return diary
     
     return await retry_on_connection_error(_save_diary)
 
 async def get_all_diaries_async(db: AsyncSession):
     async def _get_diaries():
-    from models import User
-    from sqlalchemy.orm import selectinload
-    
-    # User 테이블과 조인하여 작성자 정보도 함께 가져오기 (is_deleted = false 조건 추가)
-    result = await db.execute(
-        select(Diary, User.username)
-        .outerjoin(User, (Diary.user_id == User.id) & (User.is_deleted == False))
-        .order_by(Diary.date.desc())
-    )
-    
-    # 결과를 튜플로 받아서 처리
-    diary_user_tuples = result.all()
-    diaries = []
-    for i, (diary, username) in enumerate(diary_user_tuples):
+        from models import User
+        from sqlalchemy.orm import selectinload
+        
+        # User 테이블과 조인하여 작성자 정보도 함께 가져오기 (is_deleted = false 조건 추가)
+        result = await db.execute(
+            select(Diary, User.username)
+            .outerjoin(User, (Diary.user_id == User.id) & (User.is_deleted == False))
+            .order_by(Diary.date.desc())
+        )
+        
+        # 결과를 튜플로 받아서 처리
+        diary_user_tuples = result.all()
+        diaries = []
+        for i, (diary, username) in enumerate(diary_user_tuples):
 
-        # recommended_projects를 JSON에서 파싱
-        import json
-        diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
-        # username 속성 추가
-        diary.username = username or "알 수 없음"
-        diaries.append(diary)
+            # recommended_projects를 JSON에서 파싱
+            import json
+            diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
+            # username 속성 추가
+            diary.username = username or "알 수 없음"
+            diaries.append(diary)
 
-    return diaries
+        return diaries
     
     return await retry_on_connection_error(_get_diaries)
 
