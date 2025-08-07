@@ -1,44 +1,115 @@
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://sopt.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/sopt
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
-  jpa:
-    hibernate:
-      ddl-auto: create
-      show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 1093062512798-2od4q9a5p467gptto7a4o56uvkfsmm91.apps.googleusercontent.com
-            client-secret: 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
-            redirect-uri: https://letsadam.link/login/oauth2/code/google
-            authorization-grant-type: authorization_code
-            scope: # 기본 값 openid,profile,email => profile, email 로 설정 변경. openid가 scope에 있으면 Open Id Provider로 인식하기 때문
-              - profile
-              - email
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: study-app:v1.0.0
+    container_name: study-app
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # RDS 퍼블릭 액세스가 비활성화된 경우 내부 엔드포인트 사용
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}:3306/${RDS_DATABASE}?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${RDS_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${RDS_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_JPA_SHOW_SQL=false
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - CAFE_RECOMMENDATION_BASE_URL=https://actlog.shop/dir/
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - "8080:8080"
+    networks:
+      - study-network
+    volumes:
+      - ./logs/app:/app/logs
 
-logging:
-  level:
-    root: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.tool.schema.internal.SchemaCreatorImpl: TRACE
-    org.springframework.security: DEBUG
+  nginx:
+    image: nginx:alpine
+    container_name: study-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d/app-prod.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt/live/actlog.shop:/etc/letsencrypt/live/actlog.shop:ro
+      - /etc/letsencrypt/archive/actlog.shop:/etc/letsencrypt/archive/actlog.shop:ro
+      - ./src/main/resources/static:/var/www/html
+      - ./python-api/static:/var/www/html/static #파이썬 정적파일
+      - ./django-commerce/staticfiles:/var/www/html/django-staticfiles
+    depends_on:
+      - app
+      - python-api
+      - django-commerce
+    networks:
+      - study-network
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "https://actlog.shop" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
-cafe:
-  recommendation:
-    base:
-      url: http://3.36.241.20/dir # 고정 ip 할당 받은 후 변경 예정
+  python-api:
+    build:
+      context: ./python-api
+      dockerfile: Dockerfile
+    image: python-api:v1.0.0
+    container_name: python-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATASOURCE_HOST=${RDS_ENDPOINT}
+      - DATASOURCE_PORT=3306
+      - DATASOURCE_USERNAME=${RDS_USERNAME}
+      - DATASOURCE_PASSWORD=${RDS_PASSWORD}
+      - DATASOURCE_DB=${RDS_DATABASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    env_file:
+      - .env
+    networks:
+      - study-network
+      
+  django-commerce:
+    build:
+      context: ./django-commerce
+      dockerfile: Dockerfile
+    image: django-commerce:v1.0.0
+    container_name: django-commerce
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=False
+      - ALLOWED_HOSTS=django-commerce,actlog.shop
+      - DB_NAME=${RDS_DATABASE}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
+      - DB_HOST=${RDS_ENDPOINT}
+      - DB_PORT=3306
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME:-}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+    env_file:
+      - .env
+    networks:
+      - study-network
+    volumes:
+      - ./logs/django:/app/logs
+      - ./django-commerce/media:/app/media
+      - ./django-commerce/staticfiles:/app/staticfiles
+
+networks:
+  study-network:
+    driver: bridge
