@@ -34,10 +34,10 @@ echo "7. 이미지 빌드 및 컨테이너 실행"
 docker-compose up --build -d
 
 echo "7-1. latest를 v1.0.0으로 태그 변경"
-docker tag study-app:latest study-app:v1.0.1
-docker tag python-api:latest python-api:v1.0.1
-docker tag django-commerce:latest django-commerce:v1.0.1
-docker tag nginx:alpine nginx:v1.0.1
+docker tag study-app:latest study-app:v1.0.2
+docker tag python-api:latest python-api:v1.0.2
+docker tag django-commerce:latest django-commerce:v1.0.2
+docker tag nginx:alpine nginx:v1.0.2
 
 echo "8. 이미지 목록 확인"
 docker image ls | grep -E 'study-app|mysql|nginx|python-api|django-commerce'
@@ -46,9 +46,12 @@ docker image ls | grep -E 'study-app|mysql|nginx|python-api|django-commerce'
 
 echo "10. 모든 이미지 하나로 저장"
 docker save -o all_images.tar \
-    "study-app:v1.0.1" \
-    "python-api:v1.0.1" \
-    "django-commerce:v1.0.1" \
-    "nginx:v1.0.1"
+    "study-app:v1.0.2" \
+    "python-api:v1.0.2" \
+    "django-commerce:v1.0.2" \
+    "nginx:v1.0.2" \
+    "grafana/loki:2.8.0" \
+    "fluent/fluent-bit:2.1.10" \
+    "grafana/grafana:10.0.0" 
 
 echo "✅ 이미지 tar 저장 완료: all_images.tar"
