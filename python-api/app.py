@@ -8,6 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from routes import diary, bookclub, admin
 import os
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from datetime import datetime
+import time
 
 # logs 디렉토리 생성
 os.makedirs("logs", exist_ok=True)
@@ -17,15 +19,16 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler("logs/app.log"),
         logging.StreamHandler()
     ]
 )
 
-# uvicorn.error 로거에도 파일 핸들러 추가
-uvicorn_logger = logging.getLogger("uvicorn.error")
-if not any(isinstance(h, logging.FileHandler) for h in uvicorn_logger.handlers):
-    uvicorn_logger.addHandler(logging.FileHandler("logs/app.log"))
+# Access 로그를 위한 별도 로거 설정
+access_logger = logging.getLogger("access")
+access_logger.setLevel(logging.INFO)
+access_handler = logging.FileHandler("logs/access.log")
+access_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+access_logger.addHandler(access_handler)
 
 app = FastAPI(title="Diary Sentiment & Project Recommendation API",
               description="일기 감정 분석 및 프로젝트 추천 서비스",
@@ -39,6 +42,27 @@ templates = Jinja2Templates(directory="templates")
 app.include_router(diary.router)
 app.include_router(bookclub.router)
 app.include_router(admin.router)
+
+# Access 로그 미들웨어
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # 요청 정보 로깅
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    
+    # 응답 처리
+    response = await call_next(request)
+    
+    # 처리 시간 계산
+    process_time = time.time() - start_time
+    
+    # Access 로그 기록
+    access_log = f'{client_ip} - - [{datetime.now().strftime("%d/%b/%Y:%H:%M:%S +0000")}] "{request.method} {request.url.path} HTTP/{request.scope.get("http_version", "1.1")}" {response.status_code} - "{user_agent}" {process_time:.3f}s'
+    access_logger.info(access_log)
+    
+    return response
 
 @app.exception_handler(Exception)
 async def all_exception_handler(request: Request, exc: Exception):

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Spring Boot 애플리케이션
   app:
@@ -27,11 +25,17 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - study-network
     volumes:
       - ./logs/app:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # MySQL 데이터베이스
   mysql:
@@ -56,6 +60,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Nginx 리버스 프록시
   nginx:
@@ -74,9 +83,12 @@ services:
       - ./django-commerce/staticfiles:/var/www/html/django-staticfiles
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - app
-      - python-api
-      - django-commerce
+      app:
+        condition: service_started
+      python-api:
+        condition: service_started
+      django-commerce:
+        condition: service_started
     networks:
       - study-network
     healthcheck:
@@ -84,6 +96,11 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 기존 Python FastAPI 서비스
   python-api:
@@ -106,9 +123,17 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - study-network
+    volumes:
+      - ./logs/python-api:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
   django-commerce:
@@ -147,8 +172,55 @@ services:
       - ./logs/django:/app/logs
       - ./django-commerce/media:/app/media
       - ./django-commerce/staticfiles:/app/staticfiles
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # Loki 로깅 시스템
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - study-network
 
+  # Fluent Bit 로그 수집기
+  fluent-bit:
+    image: fluent/fluent-bit:2.1.10
+    container_name: fluent-bit
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./logs:/var/log
+    depends_on:
+      - loki
+    networks:
+      - study-network
+    healthcheck:
+      test: ["CMD", "fluent-bit", "-c", "/fluent-bit/etc/fluent-bit.conf", "-V"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Grafana 모니터링 대시보드
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - loki
+    networks:
+      - study-network
 
 networks:
   study-network:
@@ -157,3 +229,5 @@ networks:
 volumes:
   mysql_data:
     driver: local
+  loki-data:
+  grafana-data:

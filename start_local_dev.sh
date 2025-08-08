@@ -16,7 +16,7 @@ echo "3. 사용된 볼륨 삭제"
 docker volume rm study_mysql-data study_app-logs study_nginx-logs || true
 
 echo "4. 기존 앱 이미지 삭제"
-docker rmi $(docker images -q) || true
+docker rmi -f study-app:latest study-app:latest || true
 
 echo "4-1. 모든 study 관련 이미지 삭제"
 docker images | grep study | awk '{print $3}' | xargs -r docker rmi -f || true
@@ -24,34 +24,28 @@ docker images | grep study | awk '{print $3}' | xargs -r docker rmi -f || true
 echo "5. 기존 빌드 결과물 정리"
 rm -f build/libs/*.jar || true
 
-echo "5-1. 기존 이미지 tar 파일 제거"
-rm -f all_images.tar || true
-
 echo "6. Gradle 빌드 실행"
 ./gradlew clean build -x test
 
 echo "7. 이미지 빌드 및 컨테이너 실행"
 docker-compose up --build -d
 
-echo "7-1. latest를 v1.0.0으로 태그 변경"
-docker tag study-app:latest study-app:v1.0.2
-docker tag python-api:latest python-api:v1.0.2
-docker tag django-commerce:latest django-commerce:v1.0.2
-docker tag nginx:alpine nginx:v1.0.2
+echo "8. 컨테이너 시작 대기"
+echo "컨테이너들이 완전히 시작될 때까지 30초 대기..."
+sleep 30
 
-echo "8. 이미지 목록 확인"
+echo "9. Django Commerce 테스트 상품 생성"
+# Django Commerce 컨테이너가 실행 중인지 확인
+if docker ps | grep -q "django-commerce"; then
+    echo "Django Commerce 컨테이너에서 테스트 상품 생성 중..."
+    docker exec django-commerce python manage.py shell < django-commerce/commerce/create_test_products.py
+    echo "✅ 테스트 상품 생성 완료"
+else
+    echo "⚠️ Django Commerce 컨테이너가 실행되지 않았습니다."
+fi
+
+echo "10. 이미지 목록 확인"
 docker image ls | grep -E 'study-app|mysql|nginx|python-api|django-commerce'
 
-
-
-echo "10. 모든 이미지 하나로 저장"
-docker save -o all_images.tar \
-    "study-app:v1.0.2" \
-    "python-api:v1.0.2" \
-    "django-commerce:v1.0.2" \
-    "nginx:v1.0.2" \
-    "grafana/loki:2.8.0" \
-    "fluent/fluent-bit:2.1.10" \
-    "grafana/grafana:10.0.0" 
-
-echo "✅ 이미지 tar 저장 완료: all_images.tar"
+echo "11. 컨테이너 상태 확인"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

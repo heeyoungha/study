@@ -143,6 +143,15 @@ body {
     color: white;
 }
 
+.btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+}
+
 .refresh-info {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;

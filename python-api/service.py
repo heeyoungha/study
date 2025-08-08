@@ -16,7 +16,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import date
 import asyncio
+import logging
+from typing import Optional, List
+from sqlalchemy.exc import OperationalError, DisconnectionError
+from models import Diary, BookClubEntry, User
+from datetime import datetime
 from gpt_service import analyze_sentiment_async, recommend_projects_async, analyze_sentiment_with_gpt, recommend_projects_with_gpt
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 재시도 설정
+MAX_RETRIES = 3
+RETRY_DELAY = 1  # 초
+
+async def retry_on_connection_error(func, *args, **kwargs):
+    """데이터베이스 연결 오류 시 재시도하는 함수"""
+    for attempt in range(MAX_RETRIES):
+        try:
+            return await func(*args, **kwargs)
+        except (OperationalError, DisconnectionError) as e:
+            if attempt == MAX_RETRIES - 1:
+                logger.error(f"데이터베이스 연결 실패 (최대 재시도 횟수 초과): {e}")
+                raise
+            logger.warning(f"데이터베이스 연결 오류 (재시도 {attempt + 1}/{MAX_RETRIES}): {e}")
+            await asyncio.sleep(RETRY_DELAY * (attempt + 1))  # 지수 백오프
+    return None
 
 # 기존 동기 감정 분석 (fallback용)
 def analyze_sentiment(content: str) -> str:
@@ -34,44 +60,50 @@ async def analyze_sentiment_enhanced(content: str) -> dict:
     return await analyze_sentiment_with_gpt(content)
 
 async def save_diary_async(db: AsyncSession, summary: str, content: str, sentiment: str, recommended_projects: list = None, user_id: int = None):
-    import json
-    diary = Diary(
-        summary=summary,
-        content=content, 
-        sentiment=sentiment,
-        date=date.today(),
-        recommended_projects=json.dumps(recommended_projects or []),
-        user_id=user_id
-    )
-    db.add(diary)
-    await db.commit()
-    await db.refresh(diary)
-    return diary
+    async def _save_diary():
+        import json
+        diary = Diary(
+            summary=summary,
+            content=content, 
+            sentiment=sentiment,
+            date=date.today(),
+            recommended_projects=json.dumps(recommended_projects or []),
+            user_id=user_id
+        )
+        db.add(diary)
+        await db.commit()
+        await db.refresh(diary)
+        return diary
+    
+    return await retry_on_connection_error(_save_diary)
 
 async def get_all_diaries_async(db: AsyncSession):
-    from models import User
-    from sqlalchemy.orm import selectinload
-    
-    # User 테이블과 조인하여 작성자 정보도 함께 가져오기 (is_deleted = false 조건 추가)
-    result = await db.execute(
-        select(Diary, User.username)
-        .outerjoin(User, (Diary.user_id == User.id) & (User.is_deleted == False))
-        .order_by(Diary.date.desc())
-    )
-    
-    # 결과를 튜플로 받아서 처리
-    diary_user_tuples = result.all()
-    diaries = []
-    for i, (diary, username) in enumerate(diary_user_tuples):
+    async def _get_diaries():
+        from models import User
+        from sqlalchemy.orm import selectinload
+        
+        # User 테이블과 조인하여 작성자 정보도 함께 가져오기 (is_deleted = false 조건 추가)
+        result = await db.execute(
+            select(Diary, User.username)
+            .outerjoin(User, (Diary.user_id == User.id) & (User.is_deleted == False))
+            .order_by(Diary.date.desc())
+        )
+        
+        # 결과를 튜플로 받아서 처리
+        diary_user_tuples = result.all()
+        diaries = []
+        for i, (diary, username) in enumerate(diary_user_tuples):
 
-        # recommended_projects를 JSON에서 파싱
-        import json
-        diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
-        # username 속성 추가
-        diary.username = username or "알 수 없음"
-        diaries.append(diary)
+            # recommended_projects를 JSON에서 파싱
+            import json
+            diary.recommended_projects = json.loads(diary.recommended_projects or '[]')
+            # username 속성 추가
+            diary.username = username or "알 수 없음"
+            diaries.append(diary)
 
-    return diaries
+        return diaries
+    
+    return await retry_on_connection_error(_get_diaries)
 
 # 새로운 비동기 프로젝트 추천 (GPT 사용)
 async def recommend_projects_enhanced(content: str, sentiment: str) -> dict:
