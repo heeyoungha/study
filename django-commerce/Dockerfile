@@ -1,3 +1,13 @@
+FROM node:18-alpine AS frontend-builder
+
+# React 빌드 단계
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+
+COPY frontend/ .
+RUN npm run build
+
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -16,10 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Django 프로젝트 복사
 COPY commerce/ .
 
-# React 빌드 파일들을 staticfiles로 복사
-COPY frontend/build/static/ ./staticfiles/static/
-COPY frontend/build/asset-manifest.json ./staticfiles/
-COPY frontend/build/manifest.json ./staticfiles/
+# React 빌드 파일들을 frontend/build 디렉토리에 복사 (entrypoint.sh에서 사용)
+COPY --from=frontend-builder /app/frontend/build/ ./frontend/build/
 
 # Entrypoint 스크립트 복사 및 실행 권한 부여
 COPY entrypoint.sh /entrypoint.sh

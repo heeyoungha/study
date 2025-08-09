@@ -189,6 +189,7 @@ STATIC_ROOT = '/app/staticfiles'
 # 추가 정적 파일 디렉토리
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
+    BASE_DIR / 'frontend' / 'build',  # React 빌드 파일 포함
 ]
 
 # Default primary key field type
