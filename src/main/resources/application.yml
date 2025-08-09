@@ -161,3 +161,6 @@ cafe:
     base:
       url: https://actlog.shop/dir/
 
+server:
+  forward-headers-strategy: framework
+

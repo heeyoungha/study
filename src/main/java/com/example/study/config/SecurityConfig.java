@@ -79,7 +79,7 @@ public class SecurityConfig {
             http
                     .authorizeHttpRequests((auth) -> auth
                             .requestMatchers("/monitoring/**", "/unified-monitoring").permitAll()  // 모니터링 엔드포인트 명시적 허용
-                            .requestMatchers("/check-proto", "/", "/login", "/css/**", "/js/**", "/images/**", "/oauth2/**", "/debug-all").permitAll()
+                            .requestMatchers("/check-proto", "/", "/login", "/css/**", "/js/**", "/images/**", "/oauth2/**", "/debug-all", "/project/**", "/api/project/**").permitAll()
                             .anyRequest().authenticated()
                             );  // 그 외 모든 요청은 인증 필요
 
