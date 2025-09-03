@@ -116,9 +116,9 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://sopt.cj6c6qseak8m.ap-northeast-2.rds.amazonaws.com:3306/sopt
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:mysql://\${RDS_ENDPOINT}:\${RDS_PORT}/\${RDS_DATABASE}?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: \${RDS_USERNAME}
+    password: \${RDS_PASSWORD}
   jackson:
     deserialization:
       fail-on-unknown-properties: false
