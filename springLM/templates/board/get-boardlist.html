@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>게시판</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+  <div class="container">
+    <!-- 공통 네비게이션 불러오기 -->
+    <div th:replace="~{fragment/nav :: navigation}"></div>
+
+    <h1>📋 게시판</h1>
+
+    <div class="actions">
+      <a href="/board">글쓰기</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>글제목</th>
+            <th>작성자</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- CONTENTS -->
+        <tr th:each="board, index : ${boardList}">
+            <td>
+                <span th:text="${board.id}"></span>
+            </td>
+            <td>
+                <a th:href="@{'/board/'+ ${board.id}}">
+                    <span th:text="${board.title}"></span>
+                </a>
+            </td>
+            <td>
+                <span th:text="${board.writer}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 검색기능 -->
+    <form th:action="@{/boardList}" method="get" class="input-group">
+        <input type="text" name="searchKeyword" placeholder="검색어를 입력하세요" th:value="${searchKeyword}">
+        <button type="submit">검색</button>
+    </form>
+
+    <!-- 페이징 -->
+    <div th:if="${!boardList.isEmpty()}" class="pagination-container">
+        <ul class="pagination"
+            th:with="
+                    pageNumber = ${boardList.pageable.pageNumber},
+                    pageSize = ${boardList.pageable.pageSize},
+                    totalPages = ${boardList.totalPages},
+                    startPage = ${T(java.lang.Math).floor(pageNumber / pageSize) * pageSize + 1},
+                    tempEndPage = ${startPage + pageSize - 1},
+                    endPage = (${tempEndPage < totalPages ? tempEndPage : totalPages})">
+
+            <li th:classappend="${boardList.first} ? 'disabled'" class="page-item">
+                <a class="page-link" th:href="${boardList.first} ? '#' : @{/(page=${pageNumber - 1})}">
+                    <span aria-hidden="true"><</span>
+                </a>
+            </li>
+
+            <li th:each="page: ${#numbers.sequence(startPage, endPage)}" th:classappend="${page == pageNumber + 1} ? 'active'" class="page-item">
+                <a th:text="${page}" class="page-link" th:href="@{/(page=${page - 1})}"></a>
+            </li>
+
+            <li th:classappend="${boardList.last} ? 'disabled'" class="page-item">
+                <a class="page-link" th:href="${boardList.last} ? '#' : @{/(page=${pageNumber + 1})}" aria-label="Next">
+                    <span aria-hidden="true">&gt;</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+  </div>
+</body>
+</html>

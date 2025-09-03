@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema Viewer</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        #erd-container {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Database Schema Viewer</h1>
+<div id="tables-container"></div>
+<h2>ER Diagram</h2>
+<div id="erd-container">
+    <div class="mermaid">
+        <div class="mermaid">
+            %%{init: {"theme": "default"}}%%
+            erDiagram
+            board {
+            BIGINT board_id
+            VARCHAR writer
+            VARCHAR title
+            TEXT content
+            VARCHAR tag
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            cafe {
+            BIGINT id
+            VARCHAR input_address
+            DOUBLE input_latitude
+            DOUBLE input_longitude
+            VARCHAR target_address
+            VARCHAR target_pharmacy_name
+            DOUBLE target_latitude
+            DOUBLE target_longitude
+            DOUBLE distance
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            project {
+            BIGINT id
+            VARCHAR title
+            VARCHAR start_date
+            BIGINT project_user_id
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            project_seq {
+            BIGINT next_val
+            }
+
+            project_user {
+            BIGINT id
+            VARCHAR start_date
+            VARCHAR end_date
+            VARCHAR role
+            VARCHAR permission
+            VARCHAR status
+            VARCHAR memo
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            project_user_seq {
+            BIGINT next_val
+            }
+
+            reply {
+            BIGINT reply_id
+            BIGINT board_id
+            BIGINT user_id
+            VARCHAR content
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            user {
+            BIGINT id
+            VARCHAR username
+            VARCHAR email
+            VARCHAR pw
+            BIGINT project_user_id
+            DATETIME created_date
+            DATETIME modified_date
+            BIT is_deleted
+            }
+
+            project ||--|{ project_user : "has"
+            board ||--|{ reply : "has"
+            user ||--|{ reply : "writes"
+            user ||--|| project_user : "associated_with"
+        </div>
+    </div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+    function sanitizeName(name) {
+        return name.replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    async function fetchTableDetails() {
+        try {
+            const response = await fetch('/api/tables');
+            const tables = await response.json();
+            const container = document.getElementById('tables-container');
+            container.innerHTML = '';
+
+            let erdDiagram = 'erDiagram\n';
+
+            tables.forEach(table => {
+                // Create HTML for table details
+                const tableElement = document.createElement('div');
+                tableElement.innerHTML = `
+                        <h2>Table: ${table.tableName}</h2>
+                        <h3>Columns</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Nullable</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${table.columns.map(column => `
+                                    <tr>
+                                        <td>${column.name}</td>
+                                        <td>${column.type}</td>
+                                        <td>${column.size}</td>
+                                        <td>${column.nullable}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <h3>Foreign Keys</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Referenced Table</th>
+                                    <th>Referenced Column</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${table.foreignKeys.map(fk => `
+                                    <tr>
+                                        <td>${fk.columnName}</td>
+                                        <td>${fk.referencedTable}</td>
+                                        <td>${fk.referencedColumn}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                container.appendChild(tableElement);
+
+                // Add table details to ER diagram data
+                const sanitizedTableName = sanitizeName(table.tableName);
+                erdDiagram += `    ${sanitizedTableName} {\n`;
+                table.columns.forEach(column => {
+                    const sanitizedColumnName = sanitizeName(column.name);
+                    erdDiagram += `        ${column.type} ${sanitizedColumnName}\n`;
+                });
+                erdDiagram += `    }\n`;
+            });
+
+            // Add relationships to ER diagram data
+            tables.forEach(table => {
+                const sanitizedTableName = sanitizeName(table.tableName);
+                table.foreignKeys.forEach(fk => {
+                    const sanitizedReferencedTable = sanitizeName(fk.referencedTable);
+                    erdDiagram += `    ${sanitizedTableName} }|..|| ${sanitizedReferencedTable} : "references"\n`;
+                });
+            });
+
+            // Render the ERD diagram using Mermaid.js
+            const mermaidDiv = document.querySelector('.mermaid');
+            mermaidDiv.innerHTML = erdDiagram;
+            console.log('ER Diagram:', erdDiagram); // Debug output
+
+            // Initialize Mermaid.js after updating the innerHTML
+            mermaid.initialize({startOnLoad: true, theme: 'default'});
+            await mermaid.run();
+
+        } catch (error) {
+            console.error('Error fetching table details:', error);
+            document.getElementById('erd-container').innerHTML = `<p>Error generating ER diagram: ${error.message}</p>`;
+        }
+    }
+
+    fetchTableDetails();
+</script>
+</body>
+</html>
