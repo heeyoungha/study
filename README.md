@@ -1,4 +1,4 @@
-# 📌 Let'Sadam 소개
+# 📌 ActLog 소개
 -  주니어 개발자로서의 역량을 키우기 위해 설계한 로드맵을 구현해나가는 개인 프로젝트입니다.
 -  url : https://letsadam.shop
 
